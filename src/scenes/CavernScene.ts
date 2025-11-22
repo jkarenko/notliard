@@ -100,9 +100,9 @@ export default class CavernScene extends Phaser.Scene {
 
         if (this.cursors.up!.isDown) {
             if (door && door.triggerType === 'press_up') {
-                // Enter door - do not jump
-                this.scene.stop('HUDScene');
-                this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
+                // Enter door
+                this.handleDoorTransition(door, 'left'); // Assuming Cavern->Town is left
+                return; // Skip physics/jump
             } else {
                 // Jump
                 this.movementSystem.jump(this.player);
@@ -121,21 +121,22 @@ export default class CavernScene extends Phaser.Scene {
 
         // Check Touch Transitions (e.g. Exit to Town)
         if (door && door.triggerType === 'touch') {
-            this.scene.stop('HUDScene');
-            
-            if (door.destination === 'TransitionScene' && door.nextScene) {
-                // Leaving Cavern to Town -> Walk Right to Left?
-                // Door is at Left edge (x=8). 
-                // So we walk Right -> Left.
-                this.scene.start('TransitionScene', {
-                    nextScene: door.nextScene,
-                    startX: door.targetX,
-                    startY: door.targetY,
-                    direction: 'left'
-                });
-            } else {
-                this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
-            }
+            this.handleDoorTransition(door, 'left');
+        }
+    }
+
+    private handleDoorTransition(door: Door, defaultDirection: 'left'|'right') {
+        this.scene.stop('HUDScene');
+        
+        if (door.destination === 'TransitionScene' && door.nextScene) {
+            this.scene.start('TransitionScene', {
+                nextScene: door.nextScene,
+                startX: door.targetX,
+                startY: door.targetY,
+                direction: defaultDirection
+            });
+        } else {
+            this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
         }
     }
 }
