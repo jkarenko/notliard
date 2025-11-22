@@ -52,7 +52,7 @@
                         {
                          "name":"triggerType",
                          "type":"string",
-                         "value":"touch"
+                         "value":"press_up"
                         },
                         {
                          "name":"targetX",
@@ -68,7 +68,7 @@
                  "type":"door",
                  "visible":true,
                  "width":8,
-                 "x":8,
+                 "x":16,
                  "y":104
                 }],
          "opacity":1,
