@@ -8,7 +8,7 @@ export default class MainMenuScene extends Phaser.Scene {
   create() {
     this.add
       .text(this.cameras.main.width / 2, this.cameras.main.height / 2, "Notliard - Main Menu", {
-        fontSize: "32px",
+        fontSize: "16px",
         color: "#ffffff",
       })
       .setOrigin(0.5);

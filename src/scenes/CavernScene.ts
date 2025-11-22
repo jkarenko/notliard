@@ -9,6 +9,7 @@ import Door from '../entities/Door';
 import Enemy from '../entities/Enemy';
 import Slime from '../entities/enemies/Slime';
 import CombatSystem from '../systems/CombatSystem';
+import GameState from '../data/GameState';
 
 export default class CavernScene extends Phaser.Scene {
     private player!: Player;
@@ -163,7 +164,13 @@ export default class CavernScene extends Phaser.Scene {
         // Update HUD (after any potential damage)
         const hudScene = this.scene.get('HUDScene') as HUDScene;
         if (hudScene) {
-            hudScene.updateStats(this.player.hp, this.player.maxHp, 0, 0, 'Cavern Scene'); // Gold/Almas placeholder for now
+            hudScene.updateStats(
+                this.player.hp, 
+                this.player.maxHp, 
+                GameState.character.gold, 
+                GameState.character.almas, 
+                GameState.character.currentTown
+            );
         }
     }
 

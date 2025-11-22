@@ -2,9 +2,10 @@ import Phaser from 'phaser';
 import Player from '../entities/Player';
 import MovementSystem from '../systems/MovementSystem';
 import { GRID_SIZE, GAME_SPEED_HZ } from '../config/Constants';
-import { HUD_HEIGHT } from './HUDScene';
+import HUDScene, { HUD_HEIGHT } from './HUDScene';
 import EntitySpawner from '../services/EntitySpawner';
 import Door from '../entities/Door';
+import GameState from '../data/GameState';
 
 export default class TownScene extends Phaser.Scene {
     private player!: Player;
@@ -135,6 +136,18 @@ export default class TownScene extends Phaser.Scene {
             } else {
                 this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
             }
+        }
+
+        // Update HUD
+        const hudScene = this.scene.get('HUDScene') as HUDScene;
+        if (hudScene) {
+            hudScene.updateStats(
+                this.player.hp,
+                this.player.maxHp,
+                GameState.character.gold,
+                GameState.character.almas,
+                GameState.character.currentTown
+            );
         }
     }
 }

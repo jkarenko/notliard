@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GRID_SIZE } from '../config/Constants';
+import GameState from '../data/GameState';
 
 export default class Player extends Phaser.GameObjects.Sprite {
     // Logical State (Fixed Timestep)
@@ -17,9 +18,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
     private attackTimer: number = 0;
     private readonly ATTACK_DURATION: number = 200; // ms
 
-    // Player Stats
-    hp: number = 100;
-    maxHp: number = 100;
+    // Player Stats (Proxy to GameState)
+    get hp(): number { return GameState.character.hp; }
+    set hp(value: number) { GameState.character.hp = value; }
+    
+    get maxHp(): number { return GameState.character.maxHp; }
+
     isInvulnerable: boolean = false;
     private invulnerabilityTimer: number = 0;
     private readonly INVULNERABILITY_DURATION: number = 1000; // 1 second (longer than tint flash)

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GRID_SIZE } from '../config/Constants';
 import type { PhysicsEntity } from '../types/Entities';
+import GameState from '../data/GameState';
 
 export default class Enemy extends Phaser.GameObjects.Sprite implements PhysicsEntity {
     gridX: number;
@@ -12,6 +13,7 @@ export default class Enemy extends Phaser.GameObjects.Sprite implements PhysicsE
     prevLogicalY: number;
 
     hp: number = 3;
+    almasReward: number = 10;
     protected baseTint: number = 0xffffff;
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | number) {
@@ -54,6 +56,10 @@ export default class Enemy extends Phaser.GameObjects.Sprite implements PhysicsE
         this.setActive(false);
         this.setVisible(false);
         this.destroy();
+        
+        // Award Almas
+        GameState.character.almas += this.almasReward;
+        console.log(`Enemy defeated! Almas: ${GameState.character.almas}`);
     }
 
     updateVisuals(alpha: number) {
