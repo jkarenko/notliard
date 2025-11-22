@@ -28,6 +28,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         body.setSize(GRID_SIZE, GRID_SIZE);
         body.setOffset(0, 0);
         body.setCollideWorldBounds(true);
+        body.moves = false; // Disable Phaser's physics engine from moving this sprite
 
         this.initAnimations();
     }
