@@ -43,6 +43,16 @@
                          "name":"destination",
                          "type":"string",
                          "value":"CavernScene"
+                        },
+                        {
+                         "name":"targetX",
+                         "type":"int",
+                         "value":32
+                        },
+                        {
+                         "name":"targetY",
+                         "type":"int",
+                         "value":104
                         }],
                  "rotation":0,
                  "type":"door",

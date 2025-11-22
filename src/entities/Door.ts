@@ -5,8 +5,10 @@ export default class Door extends Phaser.GameObjects.Rectangle {
     gridX: number;
     gridY: number;
     destination: string;
+    targetX?: number;
+    targetY?: number;
 
-    constructor(scene: Phaser.Scene, x: number, y: number, destination: string) {
+    constructor(scene: Phaser.Scene, x: number, y: number, destination: string, targetX?: number, targetY?: number) {
         // x, y from Tiled are usually top-left. Phaser Rectangle origin is 0.5.
         // We set origin 0,0.
         super(scene, x, y, GRID_SIZE, GRID_SIZE, 0xff0000, 0.5);
@@ -15,6 +17,8 @@ export default class Door extends Phaser.GameObjects.Rectangle {
         this.gridX = Math.floor(x / GRID_SIZE);
         this.gridY = Math.floor(y / GRID_SIZE);
         this.destination = destination;
+        this.targetX = targetX;
+        this.targetY = targetY;
 
         scene.add.existing(this);
     }

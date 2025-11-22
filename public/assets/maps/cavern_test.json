@@ -43,6 +43,16 @@
                          "name":"destination",
                          "type":"string",
                          "value":"TownScene"
+                        },
+                        {
+                         "name":"targetX",
+                         "type":"int",
+                         "value":112
+                        },
+                        {
+                         "name":"targetY",
+                         "type":"int",
+                         "value":104
                         }],
                  "rotation":0,
                  "type":"door",

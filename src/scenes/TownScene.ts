@@ -21,7 +21,7 @@ export default class TownScene extends Phaser.Scene {
         super({ key: 'TownScene' });
     }
 
-    create() {
+    create(data: { startX?: number, startY?: number }) {
         // Launch HUD
         this.scene.launch('HUDScene');
 
@@ -41,8 +41,10 @@ export default class TownScene extends Phaser.Scene {
         const { doors } = spawner.spawnFromMap(this.map);
         this.doors = doors;
 
-        // Spawn player at (2, 2) - safely inside the walls
-        this.player = new Player(this, 2 * GRID_SIZE, 2 * GRID_SIZE, 'player_spritesheet');
+        // Spawn player
+        const startX = data.startX ?? 2 * GRID_SIZE;
+        const startY = data.startY ?? 2 * GRID_SIZE;
+        this.player = new Player(this, startX, startY, 'player_spritesheet');
 
         // Camera Setup
         const viewportHeight = this.cameras.main.height - HUD_HEIGHT;
@@ -116,7 +118,7 @@ export default class TownScene extends Phaser.Scene {
         if (door) {
             // Transition
             this.scene.stop('HUDScene');
-            this.scene.start(door.destination);
+            this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
         }
     }
 }
