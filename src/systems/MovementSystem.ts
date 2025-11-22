@@ -21,7 +21,6 @@ export default class MovementSystem {
         // Bounding box width is GRID_SIZE (8px).
         // Left side: entity.gridX
         // Right side: entity.gridX (since width is 1 tile exactly)
-        // If player width > tile, we'd check range. Here width=8, tile=8.
 
         // Determine grid Y for feet and head
         const feetY = nextY + GRID_SIZE; // Bottom of sprite
@@ -34,27 +33,51 @@ export default class MovementSystem {
 
         // Check floor collision (falling)
         if (entity.velocityY > 0) {
-            const tileBelow = layer.getTileAt(gridX, gridFeetY);
-            if (tileBelow && tileBelow.collides) {
-                // Landed
-                entity.logicalY = gridFeetY * GRID_SIZE - GRID_SIZE;
-                entity.velocityY = 0;
-                entity.isGrounded = true;
-            } else {
-                entity.logicalY = nextY;
-                entity.isGrounded = false;
+            const startGridY = Math.floor((entity.logicalY + GRID_SIZE - 0.01) / GRID_SIZE);
+            const endGridY = gridFeetY;
+
+            let collisionFound = false;
+            // Iterate from current position down to next position
+            for (let y = startGridY; y <= endGridY; y++) {
+                const tileBelow = layer.getTileAt(gridX, y);
+                if (tileBelow && tileBelow.collides) {
+                     // Landed on tile at row y
+                     // Snap to top of this tile
+                     entity.logicalY = y * GRID_SIZE - GRID_SIZE;
+                     entity.velocityY = 0;
+                     entity.isGrounded = true;
+                     collisionFound = true;
+                     break;
+                }
+            }
+            
+            if (!collisionFound) {
+                 entity.logicalY = nextY;
+                 entity.isGrounded = false;
             }
         }
         // Check ceiling collision (jumping)
         else if (entity.velocityY < 0) {
-            const tileAbove = layer.getTileAt(gridX, gridHeadY);
-            if (tileAbove && tileAbove.collides) {
-                // Hit head
-                entity.logicalY = (gridHeadY + 1) * GRID_SIZE;
-                entity.velocityY = 0;
-            } else {
-                entity.logicalY = nextY;
-                entity.isGrounded = false;
+            const startGridY = Math.floor(entity.logicalY / GRID_SIZE);
+            const endGridY = gridHeadY;
+
+            let collisionFound = false;
+            // Iterate from current position up to next position (reverse order)
+            for (let y = startGridY; y >= endGridY; y--) {
+                const tileAbove = layer.getTileAt(gridX, y);
+                if (tileAbove && tileAbove.collides) {
+                    // Hit head on tile at row y
+                    // Snap to bottom of this tile
+                    entity.logicalY = (y + 1) * GRID_SIZE;
+                    entity.velocityY = 0;
+                    collisionFound = true;
+                    break;
+                }
+            }
+
+            if (!collisionFound) {
+                 entity.logicalY = nextY;
+                 entity.isGrounded = false;
             }
         }
         else {
@@ -76,10 +99,6 @@ export default class MovementSystem {
         const nextGridX = entity.gridX + direction;
         
         // Horizontal Collision Check
-        // Check tile at current head/feet Y
-        // Actually, since we are grid aligned horizontally, we just check the column.
-        // But vertical position is float.
-        // We check the tiles intersecting the vertical body range.
         const topGridY = Math.floor(entity.logicalY / GRID_SIZE);
         const bottomGridY = Math.floor((entity.logicalY + GRID_SIZE - 0.1) / GRID_SIZE);
 
@@ -99,10 +118,6 @@ export default class MovementSystem {
 
     jump(entity: Player) {
         if (entity.isGrounded) {
-             // Calculate jump velocity based on desired height and gravity physics
-             // v^2 = u^2 + 2as -> u = sqrt(-2as)
-             // But design doc says "Jump parameters scale with game speed" and "Predetermined grid-aligned arc".
-             // We'll use standard physics for now as it's smoother and reliable.
              // v = -sqrt(2 * g * h)
              entity.velocityY = -Math.sqrt(2 * GRAVITY * JUMP_HEIGHT);
              entity.isGrounded = false;
