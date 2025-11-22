@@ -5,10 +5,11 @@ import MainMenuScene from './scenes/MainMenuScene';
 import TownScene from './scenes/TownScene';
 import CavernScene from './scenes/CavernScene';
 import HUDScene from './scenes/HUDScene';
+import TransitionScene from './scenes/TransitionScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     ...GameConfig,
-    scene: [BootScene, MainMenuScene, TownScene, CavernScene, HUDScene]
+    scene: [BootScene, MainMenuScene, TownScene, CavernScene, HUDScene, TransitionScene]
 };
 
 new Phaser.Game(config);

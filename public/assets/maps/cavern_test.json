@@ -42,12 +42,22 @@
                         {
                          "name":"destination",
                          "type":"string",
+                         "value":"TransitionScene"
+                        },
+                        {
+                         "name":"nextScene",
+                         "type":"string",
                          "value":"TownScene"
+                        },
+                        {
+                         "name":"triggerType",
+                         "type":"string",
+                         "value":"touch"
                         },
                         {
                          "name":"targetX",
                          "type":"int",
-                         "value":112
+                         "value":144
                         },
                         {
                          "name":"targetY",
@@ -58,7 +68,7 @@
                  "type":"door",
                  "visible":true,
                  "width":8,
-                 "x":16,
+                 "x":8,
                  "y":104
                 }],
          "opacity":1,

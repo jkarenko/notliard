@@ -93,9 +93,12 @@ export default class TownScene extends Phaser.Scene {
             }
         }
 
+        // Jump disabled in Town
+        /*
         if (this.cursors.up!.isDown) {
             this.movementSystem.jump(this.player);
         }
+        */
 
         // Apply Physics (Gravity)
         this.movementSystem.update(this.player, delta, this.terrainLayer);
@@ -104,21 +107,34 @@ export default class TownScene extends Phaser.Scene {
         if (moved) {
             this.player.playWalkAnimation();
         } else {
+             // If on ground and not moving, idle
              if (this.player.isGrounded) {
                  this.player.playIdleAnimation();
              }
         }
 
         // Check Door Collision
-        // Simple Grid Overlap
         const pGridX = this.player.gridX;
-        const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE); // Center Y
+        const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE);
 
-        const door = this.doors.find(d => d.gridX === pGridX && d.gridY === pGridY);
+        const door = this.doors.find(d => 
+            (d.triggerType === 'touch' && d.gridX === pGridX && d.gridY === pGridY) ||
+            (d.triggerType === 'press_up' && d.gridX === pGridX && d.gridY === pGridY && this.cursors.up!.isDown)
+        );
+
         if (door) {
-            // Transition
             this.scene.stop('HUDScene');
-            this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
+            
+            if (door.destination === 'TransitionScene' && door.nextScene) {
+                this.scene.start('TransitionScene', {
+                    nextScene: door.nextScene,
+                    startX: door.targetX,
+                    startY: door.targetY,
+                    direction: 'right' // Exiting town usually to the right
+                });
+            } else {
+                this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
+            }
         }
     }
 }

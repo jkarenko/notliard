@@ -23,12 +23,14 @@ export default class EntitySpawner {
                  const dest = obj.properties?.find((p: any) => p.name === 'destination')?.value;
                  const targetX = obj.properties?.find((p: any) => p.name === 'targetX')?.value;
                  const targetY = obj.properties?.find((p: any) => p.name === 'targetY')?.value;
+                 const triggerType = obj.properties?.find((p: any) => p.name === 'triggerType')?.value || 'press_up';
+                 const nextScene = obj.properties?.find((p: any) => p.name === 'nextScene')?.value;
                  
                  // Tiled objects have x, y. 
                  // Note: Tiled Y is sometimes bottom-left for tiles, but top-left for Rectangles?
                  // Usually for Insert Rectangle, it's Top-Left.
                  if (dest && obj.x !== undefined && obj.y !== undefined) {
-                     const door = new Door(this.scene, obj.x, obj.y, dest, targetX, targetY);
+                     const door = new Door(this.scene, obj.x, obj.y, dest, targetX, targetY, triggerType, nextScene);
                      doors.push(door);
                  }
              }

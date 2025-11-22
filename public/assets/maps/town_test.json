@@ -42,7 +42,17 @@
                         {
                          "name":"destination",
                          "type":"string",
+                         "value":"TransitionScene"
+                        },
+                        {
+                         "name":"nextScene",
+                         "type":"string",
                          "value":"CavernScene"
+                        },
+                        {
+                         "name":"triggerType",
+                         "type":"string",
+                         "value":"touch"
                         },
                         {
                          "name":"targetX",
@@ -58,7 +68,7 @@
                  "type":"door",
                  "visible":true,
                  "width":8,
-                 "x":120,
+                 "x":152,
                  "y":104
                 }],
          "opacity":1,

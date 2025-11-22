@@ -91,8 +91,22 @@ export default class CavernScene extends Phaser.Scene {
             }
         }
 
+        // Check Door Interaction (UP Key) vs Jump
+        const pGridX = this.player.gridX;
+        const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE);
+        
+        // Find door at player location
+        const door = this.doors.find(d => d.gridX === pGridX && d.gridY === pGridY);
+
         if (this.cursors.up!.isDown) {
-            this.movementSystem.jump(this.player);
+            if (door && door.triggerType === 'press_up') {
+                // Enter door - do not jump
+                this.scene.stop('HUDScene');
+                this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
+            } else {
+                // Jump
+                this.movementSystem.jump(this.player);
+            }
         }
 
         this.movementSystem.update(this.player, delta, this.terrainLayer);
@@ -105,14 +119,23 @@ export default class CavernScene extends Phaser.Scene {
              }
         }
 
-        // Check Door Collision
-        const pGridX = this.player.gridX;
-        const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE);
-
-        const door = this.doors.find(d => d.gridX === pGridX && d.gridY === pGridY);
-        if (door) {
+        // Check Touch Transitions (e.g. Exit to Town)
+        if (door && door.triggerType === 'touch') {
             this.scene.stop('HUDScene');
-            this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
+            
+            if (door.destination === 'TransitionScene' && door.nextScene) {
+                // Leaving Cavern to Town -> Walk Right to Left?
+                // Door is at Left edge (x=8). 
+                // So we walk Right -> Left.
+                this.scene.start('TransitionScene', {
+                    nextScene: door.nextScene,
+                    startX: door.targetX,
+                    startY: door.targetY,
+                    direction: 'left'
+                });
+            } else {
+                this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
+            }
         }
     }
 }
