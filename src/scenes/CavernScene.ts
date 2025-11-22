@@ -1,20 +1,17 @@
 import Phaser from 'phaser';
-import Player from '../entities/Player';
-import MovementSystem from '../systems/MovementSystem';
-import { GRID_SIZE } from '../config/Constants';
 
 export default class CavernScene extends Phaser.Scene {
-    private player!: Player;
-    private movementSystem!: MovementSystem;
-    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    // private player!: Player;
+    // private movementSystem!: MovementSystem;
+    // private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
     constructor() {
         super({ key: 'CavernScene' });
     }
 
     create() {
-        this.movementSystem = new MovementSystem();
-        this.player = new Player(this, 10 * GRID_SIZE, 10 * GRID_SIZE, 'player_placeholder');
+        // this.movementSystem = new MovementSystem();
+        // this.player = new Player(this, 10 * GRID_SIZE, 10 * GRID_SIZE, 'player_placeholder');
 
         this.add.text(this.cameras.main.width / 2, 50, 'Cavern Scene', {
             fontSize: '32px',
@@ -26,7 +23,7 @@ export default class CavernScene extends Phaser.Scene {
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        this.cursors = this.input.keyboard!.createCursorKeys();
+        // this.cursors = this.input.keyboard!.createCursorKeys();
 
         this.input.keyboard!.once('keydown-ENTER', () => {
             this.scene.start('TownScene');
@@ -34,6 +31,8 @@ export default class CavernScene extends Phaser.Scene {
     }
 
     update() {
+        // Temporary: Disabled movement until CavernScene gets a tilemap
+        /*
         if (Phaser.Input.Keyboard.JustDown(this.cursors.left!)) {
             this.movementSystem.move(this.player, -1, 0);
         } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right!)) {
@@ -43,5 +42,6 @@ export default class CavernScene extends Phaser.Scene {
         } else if (Phaser.Input.Keyboard.JustDown(this.cursors.down!)) {
             this.movementSystem.move(this.player, 0, 1);
         }
+        */
     }
 }

@@ -2,14 +2,24 @@ import Phaser from 'phaser';
 import { GRID_SIZE } from '../config/Constants';
 
 export default class Player extends Phaser.GameObjects.Sprite {
+    // Logical State (Fixed Timestep)
     gridX: number;
-    gridY: number;
+    logicalY: number;
+    velocityY: number = 0;
+    isGrounded: boolean = false;
+    
+    // Interpolation State
+    prevGridX: number;
+    prevLogicalY: number;
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | number) {
         super(scene, x, y, texture, frame);
 
         this.gridX = Math.floor(x / GRID_SIZE);
-        this.gridY = Math.floor(y / GRID_SIZE);
+        this.logicalY = y;
+        
+        this.prevGridX = this.gridX;
+        this.prevLogicalY = this.logicalY;
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -54,10 +64,20 @@ export default class Player extends Phaser.GameObjects.Sprite {
         }
     }
 
-    // Method to update visual position based on grid position
-    updatePositionFromGrid() {
-        this.x = this.gridX * GRID_SIZE;
-        this.y = this.gridY * GRID_SIZE;
+    // Capture current state as previous for interpolation
+    captureState() {
+        this.prevGridX = this.gridX;
+        this.prevLogicalY = this.logicalY;
+    }
+
+    // Interpolate visual position
+    updateVisuals(alpha: number) {
+        const currentX = this.gridX * GRID_SIZE;
+        const prevX = this.prevGridX * GRID_SIZE;
+        
+        this.x = Phaser.Math.Linear(prevX, currentX, alpha);
+        this.y = Phaser.Math.Linear(this.prevLogicalY, this.logicalY, alpha);
+        
         if (this.body) {
             const body = this.body as Phaser.Physics.Arcade.Body;
             body.x = this.x;

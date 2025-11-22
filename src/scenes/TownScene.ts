@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import Player from '../entities/Player';
 import MovementSystem from '../systems/MovementSystem';
-import { GRID_SIZE } from '../config/Constants';
+import { GRID_SIZE, GAME_SPEED_HZ } from '../config/Constants';
 
 export default class TownScene extends Phaser.Scene {
     private player!: Player;
@@ -9,6 +9,9 @@ export default class TownScene extends Phaser.Scene {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private map!: Phaser.Tilemaps.Tilemap;
     private terrainLayer!: Phaser.Tilemaps.TilemapLayer;
+
+    private accumulator: number = 0;
+    private fixedTimeStep: number = 1000 / GAME_SPEED_HZ;
 
     constructor() {
         super({ key: 'TownScene' });
@@ -41,22 +44,61 @@ export default class TownScene extends Phaser.Scene {
         });
     }
 
-    update() {
-        let moved = false;
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.left!)) {
-            moved = this.movementSystem.move(this.player, -1, 0, this.terrainLayer);
-            this.player.setFlipX(true);
-        } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right!)) {
-            moved = this.movementSystem.move(this.player, 1, 0, this.terrainLayer);
-            this.player.setFlipX(false);
-        } else if (Phaser.Input.Keyboard.JustDown(this.cursors.up!)) {
-            moved = this.movementSystem.move(this.player, 0, -1, this.terrainLayer);
-        } else if (Phaser.Input.Keyboard.JustDown(this.cursors.down!)) {
-            moved = this.movementSystem.move(this.player, 0, 1, this.terrainLayer);
+    update(_time: number, delta: number) {
+        this.accumulator += delta;
+
+        while (this.accumulator >= this.fixedTimeStep) {
+            this.fixedUpdate(this.fixedTimeStep);
+            this.accumulator -= this.fixedTimeStep;
         }
 
+        // Interpolation alpha
+        const alpha = this.accumulator / this.fixedTimeStep;
+        this.player.updateVisuals(alpha);
+    }
+
+    fixedUpdate(delta: number) {
+        this.player.captureState();
+
+        // Input Processing (Layer 1 Input)
+        // We poll inputs every fixed tick.
+        // For smoother "Grid" movement, holding a key moves 1 cell per tick.
+        
+        let moved = false;
+        
+        if (this.cursors.left!.isDown) {
+            if (this.movementSystem.moveHorizontal(this.player, -1, this.terrainLayer)) {
+                this.player.setFlipX(true);
+                moved = true;
+            }
+        } else if (this.cursors.right!.isDown) {
+            if (this.movementSystem.moveHorizontal(this.player, 1, this.terrainLayer)) {
+                this.player.setFlipX(false);
+                moved = true;
+            }
+        }
+
+        // Jump
+        // We use JustDown logic? 
+        // If we sample isDown at 15Hz, it might miss a quick tap if the tap is < 66ms.
+        // But Phaser's isDown is updated every frame.
+        // We should check if Jump was pressed recently (buffer).
+        // For now, simple check:
+        if (this.cursors.up!.isDown) { // Using isDown for robustness at low tick rate
+            this.movementSystem.jump(this.player);
+        }
+
+        // Apply Physics (Gravity)
+        this.movementSystem.update(this.player, delta, this.terrainLayer);
+
+        // Animations
         if (moved) {
             this.player.playWalkAnimation();
+        } else {
+             // If on ground and not moving, idle
+             if (this.player.isGrounded) {
+                 this.player.playIdleAnimation();
+             }
         }
     }
 }
