@@ -21,6 +21,8 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.prevGridX = this.gridX;
         this.prevLogicalY = this.logicalY;
 
+        this.setOrigin(0, 0); // Align sprite to top-left of grid cell
+
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
