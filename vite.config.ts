@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/notliard/', // Set base path for GitHub Pages deployment (repository name)
+  base: './', // Relative paths are safer for GH Pages subdirectories
 });
