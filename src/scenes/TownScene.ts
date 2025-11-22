@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import Player from '../entities/Player';
 import MovementSystem from '../systems/MovementSystem';
 import { GRID_SIZE, GAME_SPEED_HZ } from '../config/Constants';
+import { HUD_HEIGHT } from './HUDScene';
 
 export default class TownScene extends Phaser.Scene {
     private player!: Player;
@@ -18,6 +19,9 @@ export default class TownScene extends Phaser.Scene {
     }
 
     create() {
+        // Launch HUD
+        this.scene.launch('HUDScene');
+
         this.movementSystem = new MovementSystem();
 
         // Create Map
@@ -33,6 +37,11 @@ export default class TownScene extends Phaser.Scene {
         this.player = new Player(this, 2 * GRID_SIZE, 2 * GRID_SIZE, 'player_spritesheet');
 
         // Camera Setup
+        // Viewport height = Screen Height - HUD Height
+        // Screen Height is 240. HUD is 48. Viewport is 192.
+        const viewportHeight = this.cameras.main.height - HUD_HEIGHT;
+        this.cameras.main.setViewport(0, 0, this.cameras.main.width, viewportHeight);
+        
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
         this.cameras.main.setZoom(2);
@@ -45,6 +54,7 @@ export default class TownScene extends Phaser.Scene {
         this.cursors = this.input.keyboard!.createCursorKeys();
 
         this.input.keyboard!.once('keydown-ENTER', () => {
+            this.scene.stop('HUDScene');
             this.scene.start('CavernScene');
         });
     }
