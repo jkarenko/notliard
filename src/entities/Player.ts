@@ -18,6 +18,40 @@ export default class Player extends Phaser.GameObjects.Sprite {
         body.setSize(GRID_SIZE, GRID_SIZE);
         body.setOffset(0, 0);
         body.setCollideWorldBounds(true);
+
+        this.initAnimations();
+    }
+
+    private initAnimations() {
+        if (!this.scene.anims.exists('player-walk')) {
+            this.scene.anims.create({
+                key: 'player-walk',
+                frames: this.scene.anims.generateFrameNumbers(this.texture.key, { start: 0, end: 1 }),
+                frameRate: 4,
+                repeat: -1
+            });
+        }
+        if (!this.scene.anims.exists('player-idle')) {
+            this.scene.anims.create({
+                key: 'player-idle',
+                frames: [{ key: this.texture.key, frame: 0 }],
+                frameRate: 1
+            });
+        }
+        
+        this.play('player-idle');
+    }
+
+    playWalkAnimation() {
+        if (this.anims.currentAnim?.key !== 'player-walk') {
+            this.play('player-walk');
+        }
+    }
+
+    playIdleAnimation() {
+        if (this.anims.currentAnim?.key !== 'player-idle') {
+            this.play('player-idle');
+        }
     }
 
     // Method to update visual position based on grid position
