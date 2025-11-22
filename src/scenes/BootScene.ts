@@ -30,6 +30,12 @@ export default class BootScene extends Phaser.Scene {
         playerTexture.add(0, 0, 0, 0, 8, 8);
         playerTexture.add(1, 0, 8, 0, 8, 8);
 
+        // Generate attack effect (8x8 Yellow)
+        const attackGraphics = this.make.graphics({ x: 0, y: 0 }, false);
+        attackGraphics.fillStyle(0xffff00);
+        attackGraphics.fillRect(0, 0, 8, 8);
+        attackGraphics.generateTexture('attack_effect', 8, 8);
+
         // Generate placeholder tileset (16x8)
         // Tile 1 (Left): Gray Wall
         // Tile 2 (Right): Green Floor (unused in map for now, map uses 0 for empty)
@@ -48,6 +54,7 @@ export default class BootScene extends Phaser.Scene {
         // Load the Tiled map JSON
         this.load.tilemapTiledJSON('town_test', 'assets/maps/town_test.json');
         this.load.tilemapTiledJSON('cavern_test', 'assets/maps/cavern_test.json');
+        this.load.tilemapTiledJSON('transition_test', 'assets/maps/transition_test.json');
 
         console.log('BootScene: Assets loaded/generated.');
     }

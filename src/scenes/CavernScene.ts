@@ -135,8 +135,9 @@ export default class CavernScene extends Phaser.Scene {
         }
 
         if (this.keys.space.isDown) {
-            if (this.player.startAttack()) {
-                this.combatSystem.attack(this.player, this.enemies);
+            const attackType = this.player.startAttack(this.cursors);
+            if (attackType) {
+                this.combatSystem.attack(this.player, this.enemies, attackType);
             }
         }
 

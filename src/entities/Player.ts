@@ -75,12 +75,29 @@ export default class Player extends Phaser.GameObjects.Sprite {
         }
     }
 
-    startAttack() {
-        if (this.isAttacking) return false;
+    startAttack(cursors: Phaser.Types.Input.Keyboard.CursorKeys): 'front' | 'down' | null {
+        if (this.isAttacking) return null;
         this.isAttacking = true;
         this.attackTimer = this.ATTACK_DURATION;
         this.setTint(0xff0000); // Red flash for attack
-        return true;
+
+        let type: 'front' | 'down' = 'front';
+        // Down stab if in air and holding down
+        if (!this.isGrounded && cursors.down?.isDown) {
+            type = 'down';
+        }
+
+        // Visual Feedback (Placeholder Hitbox)
+        const offsetX = type === 'down' ? 0 : (this.flipX ? -GRID_SIZE : GRID_SIZE);
+        const offsetY = type === 'down' ? GRID_SIZE : 0;
+        
+        // We use logical position or visual? 
+        // Visuals should match visual position.
+        const effect = this.scene.add.sprite(this.x + offsetX, this.y + offsetY, 'attack_effect');
+        effect.setOrigin(0, 0);
+        this.scene.time.delayedCall(100, () => effect.destroy());
+
+        return type;
     }
 
     updateLogic(delta: number) {
