@@ -28,9 +28,37 @@
          "width":20,
          "x":0,
          "y":0
+        },
+        {
+         "draworder":"topdown",
+         "id":2,
+         "name":"Entities",
+         "objects":[
+                {
+                 "height":8,
+                 "id":1,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"destination",
+                         "type":"string",
+                         "value":"CavernScene"
+                        }],
+                 "rotation":0,
+                 "type":"door",
+                 "visible":true,
+                 "width":8,
+                 "x":120,
+                 "y":104
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":2,
- "nextobjectid":1,
+ "nextlayerid":3,
+ "nextobjectid":2,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",

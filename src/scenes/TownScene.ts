@@ -3,6 +3,8 @@ import Player from '../entities/Player';
 import MovementSystem from '../systems/MovementSystem';
 import { GRID_SIZE, GAME_SPEED_HZ } from '../config/Constants';
 import { HUD_HEIGHT } from './HUDScene';
+import EntitySpawner from '../services/EntitySpawner';
+import Door from '../entities/Door';
 
 export default class TownScene extends Phaser.Scene {
     private player!: Player;
@@ -10,6 +12,7 @@ export default class TownScene extends Phaser.Scene {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private map!: Phaser.Tilemaps.Tilemap;
     private terrainLayer!: Phaser.Tilemaps.TilemapLayer;
+    private doors: Door[] = [];
 
     private accumulator: number = 0;
     private fixedTimeStep: number = 1000 / GAME_SPEED_HZ;
@@ -33,12 +36,15 @@ export default class TownScene extends Phaser.Scene {
             this.terrainLayer.setCollision([1]); // Tile ID 1 is Wall
         }
 
+        // Spawn Entities
+        const spawner = new EntitySpawner(this);
+        const { doors } = spawner.spawnFromMap(this.map);
+        this.doors = doors;
+
         // Spawn player at (2, 2) - safely inside the walls
         this.player = new Player(this, 2 * GRID_SIZE, 2 * GRID_SIZE, 'player_spritesheet');
 
         // Camera Setup
-        // Viewport height = Screen Height - HUD Height
-        // Screen Height is 240. HUD is 48. Viewport is 192.
         const viewportHeight = this.cameras.main.height - HUD_HEIGHT;
         this.cameras.main.setViewport(0, 0, this.cameras.main.width, viewportHeight);
         
@@ -52,11 +58,6 @@ export default class TownScene extends Phaser.Scene {
         }).setScrollFactor(0);
 
         this.cursors = this.input.keyboard!.createCursorKeys();
-
-        this.input.keyboard!.once('keydown-ENTER', () => {
-            this.scene.stop('HUDScene');
-            this.scene.start('CavernScene');
-        });
     }
 
     update(_time: number, delta: number) {
@@ -76,9 +77,6 @@ export default class TownScene extends Phaser.Scene {
         this.player.captureState();
 
         // Input Processing (Layer 1 Input)
-        // We poll inputs every fixed tick.
-        // For smoother "Grid" movement, holding a key moves 1 cell per tick.
-        
         let moved = false;
         
         if (this.cursors.left!.isDown) {
@@ -93,13 +91,7 @@ export default class TownScene extends Phaser.Scene {
             }
         }
 
-        // Jump
-        // We use JustDown logic? 
-        // If we sample isDown at 15Hz, it might miss a quick tap if the tap is < 66ms.
-        // But Phaser's isDown is updated every frame.
-        // We should check if Jump was pressed recently (buffer).
-        // For now, simple check:
-        if (this.cursors.up!.isDown) { // Using isDown for robustness at low tick rate
+        if (this.cursors.up!.isDown) {
             this.movementSystem.jump(this.player);
         }
 
@@ -110,10 +102,21 @@ export default class TownScene extends Phaser.Scene {
         if (moved) {
             this.player.playWalkAnimation();
         } else {
-             // If on ground and not moving, idle
              if (this.player.isGrounded) {
                  this.player.playIdleAnimation();
              }
+        }
+
+        // Check Door Collision
+        // Simple Grid Overlap
+        const pGridX = this.player.gridX;
+        const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE); // Center Y
+
+        const door = this.doors.find(d => d.gridX === pGridX && d.gridY === pGridY);
+        if (door) {
+            // Transition
+            this.scene.stop('HUDScene');
+            this.scene.start(door.destination);
         }
     }
 }
