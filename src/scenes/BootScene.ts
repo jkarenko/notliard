@@ -47,6 +47,7 @@ export default class BootScene extends Phaser.Scene {
 
         // Load the Tiled map JSON
         this.load.tilemapTiledJSON('town_test', 'assets/maps/town_test.json');
+        this.load.tilemapTiledJSON('cavern_test', 'assets/maps/cavern_test.json');
 
         console.log('BootScene: Assets loaded/generated.');
     }

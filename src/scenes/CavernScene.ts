@@ -1,47 +1,116 @@
 import Phaser from 'phaser';
+import Player from '../entities/Player';
+import MovementSystem from '../systems/MovementSystem';
+import { GRID_SIZE, GAME_SPEED_HZ } from '../config/Constants';
+import { HUD_HEIGHT } from './HUDScene';
+import EntitySpawner from '../services/EntitySpawner';
+import Door from '../entities/Door';
 
 export default class CavernScene extends Phaser.Scene {
-    // private player!: Player;
-    // private movementSystem!: MovementSystem;
-    // private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    private player!: Player;
+    private movementSystem!: MovementSystem;
+    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    private map!: Phaser.Tilemaps.Tilemap;
+    private terrainLayer!: Phaser.Tilemaps.TilemapLayer;
+    private doors: Door[] = [];
+
+    private accumulator: number = 0;
+    private fixedTimeStep: number = 1000 / GAME_SPEED_HZ;
 
     constructor() {
         super({ key: 'CavernScene' });
     }
 
     create() {
-        // this.movementSystem = new MovementSystem();
-        // this.player = new Player(this, 10 * GRID_SIZE, 10 * GRID_SIZE, 'player_placeholder');
+        // Launch HUD
+        this.scene.launch('HUDScene');
 
-        this.add.text(this.cameras.main.width / 2, 50, 'Cavern Scene', {
-            fontSize: '32px',
+        this.movementSystem = new MovementSystem();
+
+        // Create Map
+        this.map = this.make.tilemap({ key: 'cavern_test' });
+        const tileset = this.map.addTilesetImage('placeholder_tiles', 'placeholder_tiles');
+        
+        if (tileset) {
+            this.terrainLayer = this.map.createLayer('Terrain', tileset, 0, 0)!;
+            this.terrainLayer.setCollision([1]); // Tile ID 1 is Wall
+        }
+
+        // Spawn Entities
+        const spawner = new EntitySpawner(this);
+        const { doors } = spawner.spawnFromMap(this.map);
+        this.doors = doors;
+
+        // Spawn player at (4, 13) - near the door (which is at 2, 13)
+        this.player = new Player(this, 4 * GRID_SIZE, 13 * GRID_SIZE, 'player_spritesheet');
+
+        // Camera Setup
+        const viewportHeight = this.cameras.main.height - HUD_HEIGHT;
+        this.cameras.main.setViewport(0, 0, this.cameras.main.width, viewportHeight);
+        
+        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+        this.cameras.main.setZoom(2);
+
+        this.add.text(10, 10, 'Cavern Scene', {
+            fontSize: '8px',
             color: '#ffffff'
-        }).setOrigin(0.5);
+        }).setScrollFactor(0);
 
-        this.add.text(this.cameras.main.width / 2, 90, 'Use arrow keys to move. Press ENTER to go to Town', {
-            fontSize: '16px',
-            color: '#ffffff'
-        }).setOrigin(0.5);
-
-        // this.cursors = this.input.keyboard!.createCursorKeys();
-
-        this.input.keyboard!.once('keydown-ENTER', () => {
-            this.scene.start('TownScene');
-        });
+        this.cursors = this.input.keyboard!.createCursorKeys();
     }
 
-    update() {
-        // Temporary: Disabled movement until CavernScene gets a tilemap
-        /*
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.left!)) {
-            this.movementSystem.move(this.player, -1, 0);
-        } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right!)) {
-            this.movementSystem.move(this.player, 1, 0);
-        } else if (Phaser.Input.Keyboard.JustDown(this.cursors.up!)) {
-            this.movementSystem.move(this.player, 0, -1);
-        } else if (Phaser.Input.Keyboard.JustDown(this.cursors.down!)) {
-            this.movementSystem.move(this.player, 0, 1);
+    update(_time: number, delta: number) {
+        this.accumulator += delta;
+
+        while (this.accumulator >= this.fixedTimeStep) {
+            this.fixedUpdate(this.fixedTimeStep);
+            this.accumulator -= this.fixedTimeStep;
         }
-        */
+
+        const alpha = this.accumulator / this.fixedTimeStep;
+        this.player.updateVisuals(alpha);
+    }
+
+    fixedUpdate(delta: number) {
+        this.player.captureState();
+
+        let moved = false;
+        
+        if (this.cursors.left!.isDown) {
+            if (this.movementSystem.moveHorizontal(this.player, -1, this.terrainLayer)) {
+                this.player.setFlipX(true);
+                moved = true;
+            }
+        } else if (this.cursors.right!.isDown) {
+            if (this.movementSystem.moveHorizontal(this.player, 1, this.terrainLayer)) {
+                this.player.setFlipX(false);
+                moved = true;
+            }
+        }
+
+        if (this.cursors.up!.isDown) {
+            this.movementSystem.jump(this.player);
+        }
+
+        this.movementSystem.update(this.player, delta, this.terrainLayer);
+
+        if (moved) {
+            this.player.playWalkAnimation();
+        } else {
+             if (this.player.isGrounded) {
+                 this.player.playIdleAnimation();
+             }
+        }
+
+        // Check Door Collision
+        const pGridX = this.player.gridX;
+        const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE);
+
+        const door = this.doors.find(d => d.gridX === pGridX && d.gridY === pGridY);
+        if (door) {
+            this.scene.stop('HUDScene');
+            this.scene.start(door.destination);
+        }
     }
 }
