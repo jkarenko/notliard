@@ -3,6 +3,13 @@ import Phaser from 'phaser';
 export const HUD_HEIGHT = 48;
 
 export default class HUDScene extends Phaser.Scene {
+    private graphics!: Phaser.GameObjects.Graphics;
+    
+    // UI Elements
+    private placeText!: Phaser.GameObjects.Text;
+    private goldText!: Phaser.GameObjects.Text;
+    private almasText!: Phaser.GameObjects.Text;
+
     constructor() {
         super({ key: 'HUDScene' });
     }
@@ -12,17 +19,75 @@ export default class HUDScene extends Phaser.Scene {
         const height = this.cameras.main.height;
         const hudY = height - HUD_HEIGHT;
 
-        // Draw HUD Background
-        const graphics = this.add.graphics();
-        graphics.fillStyle(0x000000); // Black background
-        graphics.fillRect(0, hudY, width, HUD_HEIGHT);
-        
-        graphics.lineStyle(2, 0xffffff); // White border
-        graphics.strokeRect(0, hudY, width, HUD_HEIGHT);
+        this.graphics = this.add.graphics();
 
-        // Add some placeholder text
-        this.add.text(10, hudY + 10, 'HP: 100/100', { fontSize: '12px', color: '#ffffff' });
-        this.add.text(100, hudY + 10, 'GOLD: 0', { fontSize: '12px', color: '#ffff00' });
-        this.add.text(200, hudY + 10, 'ALMAS: 0', { fontSize: '12px', color: '#ff0000' });
+        // 1. Main Background (Gray)
+        this.graphics.fillStyle(0x666666);
+        this.graphics.fillRect(0, hudY, width, HUD_HEIGHT);
+
+        // 2. Info Section (Left) - Blue Background Panel?
+        // The original has distinct blue strips. Let's draw one big blue box or strips.
+        // Let's do strips for authentic look.
+        
+        const startX = 4;
+        const stripWidth = 200;
+        const stripHeight = 12;
+        const spacing = 2;
+
+        // Strip 1: LIFE
+        this.drawStrip(startX, hudY + 2, stripWidth, stripHeight);
+        // Strip 2: PLACE
+        this.drawStrip(startX, hudY + 14 + spacing, stripWidth, stripHeight);
+        // Strip 3: GOLD/ALMAS
+        this.drawStrip(startX, hudY + 26 + spacing * 2, stripWidth, stripHeight);
+
+        // 3. Equipment Boxes (Right)
+        const boxSize = 32;
+        const boxY = hudY + 8;
+        const boxStartX = 210;
+        const boxSpacing = 4;
+
+        for (let i = 0; i < 3; i++) {
+            const bx = boxStartX + (boxSize + boxSpacing) * i;
+            // Black fill
+            this.graphics.fillStyle(0x000000);
+            this.graphics.fillRect(bx, boxY, boxSize, boxSize);
+            // White border
+            this.graphics.lineStyle(2, 0xffffff);
+            this.graphics.strokeRect(bx, boxY, boxSize, boxSize);
+        }
+
+        // 4. Text Labels
+        const textConfig = { fontSize: '10px', fontFamily: 'monospace', resolution: 2 };
+
+        // Row 1: LIFE
+        this.add.text(startX + 2, hudY + 3, 'LIFE', { ...textConfig, color: '#ffff00' });
+        // Draw Life Bar Placeholder
+        this.graphics.fillStyle(0x00ff00);
+        this.graphics.fillRect(startX + 35, hudY + 5, 100, 6);
+
+        // Row 2: PLACE
+        this.add.text(startX + 2, hudY + 14 + spacing + 1, 'PLACE', { ...textConfig, color: '#00ff00' });
+        this.placeText = this.add.text(startX + 45, hudY + 14 + spacing + 1, 'Muralla Town', { ...textConfig, color: '#ffffff' });
+
+        // Row 3: GOLD / ALMAS
+        this.add.text(startX + 2, hudY + 26 + spacing * 2 + 1, 'GOLD', { ...textConfig, color: '#ffff00' });
+        this.goldText = this.add.text(startX + 35, hudY + 26 + spacing * 2 + 1, '0', { ...textConfig, color: '#ffffff' });
+
+        this.add.text(startX + 90, hudY + 26 + spacing * 2 + 1, 'ALMAS', { ...textConfig, color: '#00ff00' });
+        this.almasText = this.add.text(startX + 130, hudY + 26 + spacing * 2 + 1, '0', { ...textConfig, color: '#ffffff' });
+    }
+
+    private drawStrip(x: number, y: number, w: number, h: number) {
+        this.graphics.fillStyle(0x000088); // Dark Blue
+        this.graphics.fillRect(x, y, w, h);
+    }
+
+    // Method to update stats (can be called from TownScene)
+    public updateStats(_hp: number, _maxHp: number, gold: number, almas: number, place: string) {
+        this.goldText.setText(gold.toString());
+        this.almasText.setText(almas.toString());
+        this.placeText.setText(place);
+        // Update Life Bar logic here later
     }
 }
