@@ -7,11 +7,14 @@ import EntitySpawner from '../services/EntitySpawner';
 import Door from '../entities/Door';
 import Enemy from '../entities/Enemy';
 import Slime from '../entities/enemies/Slime';
+import CombatSystem from '../systems/CombatSystem';
 
 export default class CavernScene extends Phaser.Scene {
     private player!: Player;
     private movementSystem!: MovementSystem;
+    private combatSystem!: CombatSystem;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    private keys!: { space: Phaser.Input.Keyboard.Key };
     private map!: Phaser.Tilemaps.Tilemap;
     private terrainLayer!: Phaser.Tilemaps.TilemapLayer;
     private doors: Door[] = [];
@@ -29,6 +32,7 @@ export default class CavernScene extends Phaser.Scene {
         this.scene.launch('HUDScene');
 
         this.movementSystem = new MovementSystem();
+        this.combatSystem = new CombatSystem();
 
         // Create Map
         this.map = this.make.tilemap({ key: 'cavern_test' });
@@ -64,6 +68,9 @@ export default class CavernScene extends Phaser.Scene {
         }).setScrollFactor(0);
 
         this.cursors = this.input.keyboard!.createCursorKeys();
+        this.keys = {
+            space: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+        };
     }
 
     update(_time: number, delta: number) {
@@ -81,13 +88,19 @@ export default class CavernScene extends Phaser.Scene {
 
     fixedUpdate(delta: number) {
         this.player.captureState();
+        this.player.updateLogic(delta);
+
         this.enemies.forEach(enemy => {
+            if (!enemy.active) return;
             enemy.captureState();
             this.movementSystem.update(enemy, delta, this.terrainLayer);
             if (enemy instanceof Slime) {
                 enemy.updateAI(delta, this.movementSystem, this.terrainLayer);
             }
         });
+
+        // Cleanup dead enemies
+        this.enemies = this.enemies.filter(e => e.active);
 
         let moved = false;
         
@@ -118,6 +131,12 @@ export default class CavernScene extends Phaser.Scene {
             } else {
                 // Jump
                 this.movementSystem.jump(this.player);
+            }
+        }
+
+        if (this.keys.space.isDown) {
+            if (this.player.startAttack()) {
+                this.combatSystem.attack(this.player, this.enemies);
             }
         }
 

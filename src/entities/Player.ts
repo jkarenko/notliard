@@ -12,6 +12,11 @@ export default class Player extends Phaser.GameObjects.Sprite {
     prevGridX: number;
     prevLogicalY: number;
 
+    // Combat State
+    isAttacking: boolean = false;
+    private attackTimer: number = 0;
+    private readonly ATTACK_DURATION: number = 200; // ms
+
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | number) {
         super(scene, x, y, texture, frame);
 
@@ -67,6 +72,24 @@ export default class Player extends Phaser.GameObjects.Sprite {
     playIdleAnimation() {
         if (this.anims.currentAnim?.key !== 'player-idle') {
             this.play('player-idle');
+        }
+    }
+
+    startAttack() {
+        if (this.isAttacking) return false;
+        this.isAttacking = true;
+        this.attackTimer = this.ATTACK_DURATION;
+        this.setTint(0xff0000); // Red flash for attack
+        return true;
+    }
+
+    updateLogic(delta: number) {
+        if (this.isAttacking) {
+            this.attackTimer -= delta;
+            if (this.attackTimer <= 0) {
+                this.isAttacking = false;
+                this.clearTint();
+            }
         }
     }
 

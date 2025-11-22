@@ -11,6 +11,9 @@ export default class Enemy extends Phaser.GameObjects.Sprite implements PhysicsE
     prevGridX: number;
     prevLogicalY: number;
 
+    hp: number = 3;
+    protected baseTint: number = 0xffffff;
+
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | number) {
         super(scene, x, y, texture, frame);
         this.setOrigin(0, 0);
@@ -33,6 +36,24 @@ export default class Enemy extends Phaser.GameObjects.Sprite implements PhysicsE
     captureState() {
         this.prevGridX = this.gridX;
         this.prevLogicalY = this.logicalY;
+    }
+
+    takeDamage(amount: number) {
+        this.hp -= amount;
+        this.setTint(0xffffff); // Flash white (or bright)
+        this.scene.time.delayedCall(100, () => {
+            if (this.active) this.setTint(this.baseTint);
+        });
+
+        if (this.hp <= 0) {
+            this.die();
+        }
+    }
+
+    die() {
+        this.setActive(false);
+        this.setVisible(false);
+        this.destroy();
     }
 
     updateVisuals(alpha: number) {

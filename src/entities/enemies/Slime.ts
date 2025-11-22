@@ -9,7 +9,8 @@ export default class Slime extends Enemy {
     constructor(scene: Phaser.Scene, x: number, y: number) {
         // Use player spritesheet for now (maybe tint it green?)
         super(scene, x, y, 'player_spritesheet', 0);
-        this.setTint(0x00ff00); // Green slime
+        this.baseTint = 0x00ff00;
+        this.setTint(this.baseTint); // Green slime
     }
 
     updateAI(delta: number, movementSystem: MovementSystem, layer: Phaser.Tilemaps.TilemapLayer) {
