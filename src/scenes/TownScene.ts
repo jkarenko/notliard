@@ -32,10 +32,15 @@ export default class TownScene extends Phaser.Scene {
         // Spawn player at (2, 2) - safely inside the walls
         this.player = new Player(this, 2 * GRID_SIZE, 2 * GRID_SIZE, 'player_spritesheet');
 
-        this.add.text(10, 130, 'Town Scene', {
-            fontSize: '16px',
+        // Camera Setup
+        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+        this.cameras.main.setZoom(2);
+
+        this.add.text(10, 10, 'Town Scene', {
+            fontSize: '8px',
             color: '#ffffff'
-        });
+        }).setScrollFactor(0);
 
         this.cursors = this.input.keyboard!.createCursorKeys();
 
