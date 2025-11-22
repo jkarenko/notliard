@@ -36,7 +36,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
         if (!this.scene.anims.exists('player-walk')) {
             this.scene.anims.create({
                 key: 'player-walk',
-                frames: this.scene.anims.generateFrameNumbers(this.texture.key, { start: 0, end: 1 }),
+                frames: [
+                    { key: this.texture.key, frame: 0 },
+                    { key: this.texture.key, frame: 1 }
+                ],
                 frameRate: 4,
                 repeat: -1
             });

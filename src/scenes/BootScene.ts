@@ -25,6 +25,11 @@ export default class BootScene extends Phaser.Scene {
 
         playerGraphics.generateTexture('player_spritesheet', 16, 8);
 
+        // Manually add frames for the spritesheet so animations can use them
+        const playerTexture = this.textures.get('player_spritesheet');
+        playerTexture.add(0, 0, 0, 0, 8, 8);
+        playerTexture.add(1, 0, 8, 0, 8, 8);
+
         // Generate placeholder tileset (16x8)
         // Tile 1 (Left): Gray Wall
         // Tile 2 (Right): Green Floor (unused in map for now, map uses 0 for empty)
