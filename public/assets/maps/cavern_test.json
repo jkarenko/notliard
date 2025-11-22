@@ -70,6 +70,23 @@
                  "width":8,
                  "x":16,
                  "y":104
+                },
+                {
+                 "height":8,
+                 "id":2,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"enemyType",
+                         "type":"string",
+                         "value":"slime"
+                        }],
+                 "rotation":0,
+                 "type":"enemy",
+                 "visible":true,
+                 "width":8,
+                 "x":64,
+                 "y":80
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -78,7 +95,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":2,
+ "nextobjectid":3,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",

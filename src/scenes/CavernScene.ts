@@ -5,6 +5,8 @@ import { GRID_SIZE, GAME_SPEED_HZ } from '../config/Constants';
 import { HUD_HEIGHT } from './HUDScene';
 import EntitySpawner from '../services/EntitySpawner';
 import Door from '../entities/Door';
+import Enemy from '../entities/Enemy';
+import Slime from '../entities/enemies/Slime';
 
 export default class CavernScene extends Phaser.Scene {
     private player!: Player;
@@ -13,6 +15,7 @@ export default class CavernScene extends Phaser.Scene {
     private map!: Phaser.Tilemaps.Tilemap;
     private terrainLayer!: Phaser.Tilemaps.TilemapLayer;
     private doors: Door[] = [];
+    private enemies: Enemy[] = [];
 
     private accumulator: number = 0;
     private fixedTimeStep: number = 1000 / GAME_SPEED_HZ;
@@ -38,8 +41,9 @@ export default class CavernScene extends Phaser.Scene {
 
         // Spawn Entities
         const spawner = new EntitySpawner(this);
-        const { doors } = spawner.spawnFromMap(this.map);
+        const { doors, enemies } = spawner.spawnFromMap(this.map);
         this.doors = doors;
+        this.enemies = enemies;
 
         // Spawn player
         const startX = data.startX ?? 4 * GRID_SIZE;
@@ -72,10 +76,18 @@ export default class CavernScene extends Phaser.Scene {
 
         const alpha = this.accumulator / this.fixedTimeStep;
         this.player.updateVisuals(alpha);
+        this.enemies.forEach(enemy => enemy.updateVisuals(alpha));
     }
 
     fixedUpdate(delta: number) {
         this.player.captureState();
+        this.enemies.forEach(enemy => {
+            enemy.captureState();
+            this.movementSystem.update(enemy, delta, this.terrainLayer);
+            if (enemy instanceof Slime) {
+                enemy.updateAI(delta, this.movementSystem, this.terrainLayer);
+            }
+        });
 
         let moved = false;
         

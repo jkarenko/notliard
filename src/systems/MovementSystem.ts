@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
 import { GRID_SIZE, GRAVITY, JUMP_HEIGHT } from '../config/Constants';
-import Player from '../entities/Player';
+import type { PhysicsEntity } from '../types/Entities';
 
 export default class MovementSystem {
     constructor() {
     }
 
     // Called every fixed update tick
-    update(entity: Player, deltaMs: number, layer: Phaser.Tilemaps.TilemapLayer) {
+    update(entity: PhysicsEntity, deltaMs: number, layer: Phaser.Tilemaps.TilemapLayer) {
         const dt = deltaMs / 1000; // Convert to seconds
 
         // Apply Gravity
@@ -95,7 +95,7 @@ export default class MovementSystem {
     }
 
     // Moves horizontally by 1 grid unit
-    moveHorizontal(entity: Player, direction: number, layer: Phaser.Tilemaps.TilemapLayer): boolean {
+    moveHorizontal(entity: PhysicsEntity, direction: number, layer: Phaser.Tilemaps.TilemapLayer): boolean {
         const nextGridX = entity.gridX + direction;
         
         // Horizontal Collision Check
@@ -116,7 +116,7 @@ export default class MovementSystem {
         return false;
     }
 
-    jump(entity: Player) {
+    jump(entity: PhysicsEntity) {
         if (entity.isGrounded) {
              // v = -sqrt(2 * g * h)
              entity.velocityY = -Math.sqrt(2 * GRAVITY * JUMP_HEIGHT);
