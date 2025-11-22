@@ -4,11 +4,13 @@ export const HUD_HEIGHT = 48;
 
 export default class HUDScene extends Phaser.Scene {
     private graphics!: Phaser.GameObjects.Graphics;
+    private lifeBar!: Phaser.GameObjects.Graphics;
     
     // UI Elements
     private placeText!: Phaser.GameObjects.Text;
     private goldText!: Phaser.GameObjects.Text;
     private almasText!: Phaser.GameObjects.Text;
+    private hpText!: Phaser.GameObjects.Text;
 
     constructor() {
         super({ key: 'HUDScene' });
@@ -20,6 +22,7 @@ export default class HUDScene extends Phaser.Scene {
         const hudY = height - HUD_HEIGHT;
 
         this.graphics = this.add.graphics();
+        this.lifeBar = this.add.graphics(); // Separate graphics for life bar
 
         // 1. Main Background (Gray)
         this.graphics.fillStyle(0x666666);
@@ -62,9 +65,11 @@ export default class HUDScene extends Phaser.Scene {
 
         // Row 1: LIFE
         this.add.text(startX + 2, hudY + 3, 'LIFE', { ...textConfig, color: '#ffff00' });
-        // Draw Life Bar Placeholder
-        this.graphics.fillStyle(0x00ff00);
-        this.graphics.fillRect(startX + 35, hudY + 5, 100, 6);
+        // Life Bar
+        // Initial full bar
+        this.lifeBar.fillStyle(0x00ff00);
+        this.lifeBar.fillRect(startX + 35, hudY + 5, 100, 6);
+        this.hpText = this.add.text(startX + 35, hudY + 3, '100/100', { ...textConfig, color: '#ffffff' });
 
         // Row 2: PLACE
         this.add.text(startX + 2, hudY + 14 + spacing + 1, 'PLACE', { ...textConfig, color: '#00ff00' });
@@ -84,10 +89,18 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     // Method to update stats (can be called from TownScene)
-    public updateStats(_hp: number, _maxHp: number, gold: number, almas: number, place: string) {
+    public updateStats(hp: number, maxHp: number, gold: number, almas: number, place: string) {
+        const startX = 4; // Same as in create
+        const hudY = this.cameras.main.height - HUD_HEIGHT; // Same as in create
+
+        const lifeBarWidth = (hp / maxHp) * 100; // Max 100 width
+        this.lifeBar.clear();
+        this.lifeBar.fillStyle(0x00ff00); // Green color
+        this.lifeBar.fillRect(startX + 35, hudY + 5, lifeBarWidth, 6);
+
+        this.hpText.setText(`${hp}/${maxHp}`);
         this.goldText.setText(gold.toString());
         this.almasText.setText(almas.toString());
         this.placeText.setText(place);
-        // Update Life Bar logic here later
     }
 }

@@ -35,4 +35,36 @@ export default class CombatSystem {
         
         return hitEnemies.length > 0;
     }
+
+    checkPlayerEnemyCollision(player: Player, enemies: Enemy[]) {
+        if (player.isInvulnerable) return; // Player is protected
+
+        // Player bounding box (using logical position, 8x8 size)
+        const playerLeft = player.gridX * GRID_SIZE;
+        const playerRight = player.gridX * GRID_SIZE + GRID_SIZE;
+        const playerTop = player.logicalY;
+        const playerBottom = player.logicalY + GRID_SIZE;
+
+        enemies.forEach(enemy => {
+            if (!enemy.active) return; // Only check active enemies
+
+            // Enemy bounding box
+            const enemyLeft = enemy.gridX * GRID_SIZE;
+            const enemyRight = enemy.gridX * GRID_SIZE + GRID_SIZE;
+            const enemyTop = enemy.logicalY;
+            const enemyBottom = enemy.logicalY + GRID_SIZE;
+
+            // AABB Overlap check
+            if (
+                playerLeft < enemyRight &&
+                playerRight > enemyLeft &&
+                playerTop < enemyBottom &&
+                playerBottom > enemyTop
+            ) {
+                // Collision detected
+                player.takeDamage(10); // Example: 10 damage
+                // Add knockback if desired (e.g., player.velocityY = -200; player.gridX += direction;)
+            }
+        });
+    }
 }

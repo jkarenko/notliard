@@ -17,6 +17,13 @@ export default class Player extends Phaser.GameObjects.Sprite {
     private attackTimer: number = 0;
     private readonly ATTACK_DURATION: number = 200; // ms
 
+    // Player Stats
+    hp: number = 100;
+    maxHp: number = 100;
+    isInvulnerable: boolean = false;
+    private invulnerabilityTimer: number = 0;
+    private readonly INVULNERABILITY_DURATION: number = 1000; // 1 second (longer than tint flash)
+
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | number) {
         super(scene, x, y, texture, frame);
 
@@ -100,6 +107,40 @@ export default class Player extends Phaser.GameObjects.Sprite {
         return type;
     }
 
+    takeDamage(amount: number) {
+        if (this.isInvulnerable) return;
+
+        this.hp -= amount;
+        if (this.hp < 0) this.hp = 0;
+
+        // Visual feedback
+        this.setTint(0xff0000); // Red flash for damage
+        this.isInvulnerable = true;
+        this.invulnerabilityTimer = this.INVULNERABILITY_DURATION;
+
+        // Flash effect (blink)
+        this.scene.tweens.add({
+            targets: this,
+            alpha: 0.5,
+            ease: 'Power1',
+            duration: 100,
+            yoyo: true,
+            repeat: Math.floor(this.INVULNERABILITY_DURATION / 200) - 1, // Blink duration / (tween duration * 2)
+            onComplete: () => {
+                if (this.active) { // Ensure player is still active
+                    this.clearTint();
+                    this.alpha = 1;
+                }
+            }
+        });
+
+        console.log(`Player took ${amount} damage. HP: ${this.hp}`);
+
+        if (this.hp <= 0) {
+            this.die();
+        }
+    }
+
     updateLogic(delta: number) {
         if (this.isAttacking) {
             this.attackTimer -= delta;
@@ -108,6 +149,27 @@ export default class Player extends Phaser.GameObjects.Sprite {
                 this.clearTint();
             }
         }
+        if (this.isInvulnerable) {
+            this.invulnerabilityTimer -= delta;
+            if (this.invulnerabilityTimer <= 0) {
+                this.isInvulnerable = false;
+                this.clearTint(); // Ensure tint is cleared at end of invulnerability
+                this.alpha = 1; // Ensure alpha is reset
+            }
+        }
+    }
+
+    die() {
+        console.log('Player died!');
+        // For now, reset position and HP. Later: GameOverScene.
+        this.hp = this.maxHp;
+        this.gridX = 2; // Reset to start
+        this.logicalY = 2 * GRID_SIZE;
+        this.velocityY = 0;
+        this.isGrounded = false;
+        this.clearTint();
+        this.alpha = 1;
+        this.isInvulnerable = false;
     }
 
     // Capture current state as previous for interpolation

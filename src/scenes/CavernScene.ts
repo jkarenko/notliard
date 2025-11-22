@@ -3,6 +3,7 @@ import Player from '../entities/Player';
 import MovementSystem from '../systems/MovementSystem';
 import { GRID_SIZE, GAME_SPEED_HZ } from '../config/Constants';
 import { HUD_HEIGHT } from './HUDScene';
+import HUDScene from './HUDScene'; // Added HUDScene import
 import EntitySpawner from '../services/EntitySpawner';
 import Door from '../entities/Door';
 import Enemy from '../entities/Enemy';
@@ -154,6 +155,15 @@ export default class CavernScene extends Phaser.Scene {
         // Check Touch Transitions (e.g. Exit to Town)
         if (door && door.triggerType === 'touch') {
             this.handleDoorTransition(door, 'left');
+        }
+
+        // Combat: Player-Enemy Collision
+        this.combatSystem.checkPlayerEnemyCollision(this.player, this.enemies);
+
+        // Update HUD (after any potential damage)
+        const hudScene = this.scene.get('HUDScene') as HUDScene;
+        if (hudScene) {
+            hudScene.updateStats(this.player.hp, this.player.maxHp, 0, 0, 'Cavern Scene'); // Gold/Almas placeholder for now
         }
     }
 
