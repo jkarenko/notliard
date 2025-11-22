@@ -2,9 +2,11 @@
 
 ## Project Overview
 
-This project is a browser-based remake of the 1990 DOS game **Zeliard**, developed by Game Arts/Sierra On-Line. It is an Action RPG / Metroidvania Platformer. The remake aims to replicate the original game's mechanics (grid-based movement, combat, economy) while utilizing modern web technologies.
+This project is a browser-based remake of the 1990 DOS game **Zeliard**, developed by Game Arts/Sierra On-Line. It is an Action RPG / Metroidvania Platformer. The remake replicates the original game's mechanics (grid-based movement, combat, economy) using modern web technologies.
 
-**Status:** Design Phase / Initial Setup. (Source code not yet initialized).
+**Status:** In Development. Core gameplay (movement, combat, maps, transitions) is implemented.
+
+**Live Demo:** [GitHub Pages](https://jkarenko.github.io/notliard/)
 
 ## Technical Architecture
 
@@ -12,65 +14,50 @@ This project is a browser-based remake of the 1990 DOS game **Zeliard**, develop
 * **Language:** TypeScript 5.x
 * **Build Tool:** Vite 5.x
 * **Level Editor:** Tiled Map Editor (exporting to Phaser-compatible JSON)
-* **Persistence:** `localStorage` for save states (.USR file simulation)
-* **Audio:** Phaser Web Audio API wrapper
+* **Persistence:** `localStorage` for save states (via `GameState` singleton)
+* **CI/CD:** GitHub Actions (deploys to GitHub Pages)
 
-## Directory Structure
+## Implemented Features
 
-The project is currently in the design phase. The following documentation is available in `doc/design/`:
+* **Movement System:** 8px grid-based movement with fixed timestep (15Hz logic / 60Hz visual interpolation). Gravity and jumping physics implemented.
+* **Combat System:** Melee attack (Spacebar), hit detection, enemy damage/death, visual feedback (flash/blink), invulnerability frames.
+* **Maps:** Tiled map integration (`town_test`, `cavern_test`, `transition_test`) with collision and scrolling.
+* **Transitions:** Automated "walking" cutscenes between Town and Cavern.
+* **Entities:**
+  * **Player:** Grid-aligned, animated, HP/Stats synced with GameState.
+  * **Enemies:** Basic Slime AI (patrol), takes damage, drops Almas.
+  * **Doors:** Trigger transitions (Press UP or Touch).
+* **UI/HUD:** Authentic layout (Gray background, Blue strips) displaying persistent HP, Gold, Almas, and Location.
 
-* `01-notliard-design-document.md`: High-level game design, mechanics, story, and data structures.
-* `02-notliard-phaser-architecture.md`: Detailed technical architecture, file structure, class hierarchy, and implementation plan.
-* `03-notliard-asset-loading-strategy.md`: Strategy for managing and loading game assets.
-
-## Planned Source Structure
-
-The source code will likely follow this structure once initialized (based on `02-notliard-phaser-architecture.md`):
+## Source Structure
 
 ```plaintext
 src/
-├── config/         # Game configuration and constants
-├── scenes/         # Phaser scenes (Boot, Menu, Town, Cavern, Boss)
-├── entities/       # Game objects (Player, Enemy, NPC, Item)
-├── systems/        # Core logic (Movement, Collision, Combat, Economy)
-├── services/       # Stateless utilities (Tilemap, Animation)
-├── data/           # Game data (Stats, Shops, Progression)
-└── ui/             # UI Components (HUD, Inventory, Dialogue)
+├── config/         # GameConfig.ts, Constants.ts
+├── data/           # GameState.ts (Persistent data)
+├── entities/       # Player.ts, Enemy.ts, Door.ts
+│   └── enemies/    # Specific enemy types (Slime.ts)
+├── scenes/         # BootScene, MainMenuScene, TownScene, CavernScene, HUDScene, TransitionScene
+├── services/       # EntitySpawner.ts (Tiled object spawning)
+├── systems/        # MovementSystem.ts (Physics), CombatSystem.ts
+├── types/          # Shared interfaces
+└── ui/             # (Merged into HUDScene for now)
 ```
 
-## Development Roadmap
+## Getting Started
 
-**Phase 1: Foundation**
-
-* Project setup (Vite + TypeScript + Phaser)
-* Basic scene architecture
-* Grid-based movement system implementation
-* Tiled map integration
-
-**Phase 2: Core Mechanics**
-
-* Collision detection (Tile & Entity)
-* Combat system
-* Enemy AI foundation
-* Inventory system
-
-**Phase 3: Systems**
-
-* Spell system
-* Save/Load (localStorage)
-* Economy (Shops, Banking)
-* Progression (Sage upgrades)
-
-## Getting Started (Planned)
-
-Once the project is initialized, the standard workflow will be:
-
-1. `npm install` - Install dependencies
-2. `npm run dev` - Start local development server via Vite
-3. `npm run build` - Build for production
+1. **Install:** `npm install`
+2. **Run Dev Server:** `npm run dev` (Open `http://localhost:5173`)
+3. **Build:** `npm run build` (Output to `dist/`)
 
 ## Key Design Constraints
 
-* **Movement:** Grid-based (8px tiles), fixed timestep updates (5-30 Hz), optional visual interpolation at 60 Hz.
-* **Resolution:** 640x480 logical canvas (scaled).
-* **Input:** Keyboard (Arrows, Space, Alt, Enter).
+* **Resolution:** 320x240 logical canvas (scaled 2x zoom in scenes to fill screen).
+* **Grid:** 8x8 pixels.
+* **Input:** Keyboard (Arrows, Space to Attack, UP to enter doors).
+* **Physics:** Custom `MovementSystem` (not Arcade Physics for movement), swept AABB collision.
+
+## Deployment
+
+* **GitHub Actions:** Automatically builds and deploys `dist/` to GitHub Pages on push to `main`.
+* **Config:** `vite.config.ts` sets `base: './'` for relative path support.
