@@ -62,19 +62,36 @@ export default class CombatSystem {
                 playerBottom > enemyTop
             ) {
                 // Collision detected
-                const enemyCenterX = (enemy.gridX * GRID_SIZE) + (GRID_SIZE / 2);
-                this.applyDamageToPlayer(player, enemy.damage, enemyCenterX);
+                this.applyDamageToPlayer(player, enemy.damage, enemy);
             }
         });
     }
 
-    private applyDamageToPlayer(player: Player, amount: number, sourceX: number) {
+    private applyDamageToPlayer(player: Player, amount: number, enemy: Enemy) {
         const shield = GameState.character.shield;
 
-        // Apply knockback regardless of shield hit (usually)
-        // Check if player is already invulnerable to avoid spamming knockback
+        // Apply knockback regardless of shield hit
         if (!player.isInvulnerable) {
-             player.applyKnockback(sourceX);
+             // Use PREVIOUS grid positions to determine approach direction
+             // This handles cases where one moved into the other
+             const diff = player.prevGridX - enemy.prevGridX;
+             
+             let direction = 0;
+             if (diff !== 0) {
+                 direction = Math.sign(diff);
+             } else {
+                 // If they were already overlapping in X (e.g. vertical drop attack),
+                 // try current positions
+                 const currDiff = player.gridX - enemy.gridX;
+                 if (currDiff !== 0) {
+                     direction = Math.sign(currDiff);
+                 } else {
+                     // Total overlap? Knock opposite to facing
+                     direction = player.flipX ? 1 : -1;
+                 }
+             }
+             
+             player.applyKnockback(direction);
         }
 
         if (shield.equipped !== -1 && shield.current > 0) {

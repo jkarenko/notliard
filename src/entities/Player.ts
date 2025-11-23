@@ -162,23 +162,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.scene.time.delayedCall(200, () => this.clearTint());
     }
 
-    applyKnockback(sourceX: number) {
-        if (this.isInvulnerable) return; // Should already be checked, but safety first
+    applyKnockback(direction: number) {
+        if (this.isInvulnerable) return; 
         
         this.isKnockedBack = true;
-        this.knockbackTimer = 400; // 400ms stun/knockback
-        
-        // Direction: away from source (enemy)
-        const playerCenterX = (this.gridX * GRID_SIZE) + (GRID_SIZE / 2);
-        
-        // If overlap or too close, default to opposite of facing direction
-        // If facing right (flipX=false), knock left (-1).
-        // If facing left (flipX=true), knock right (1).
-        if (Math.abs(playerCenterX - sourceX) < 1) {
-            this.knockbackDirection = this.flipX ? 1 : -1;
-        } else {
-            this.knockbackDirection = playerCenterX < sourceX ? -1 : 1;
-        }
+        this.knockbackTimer = 200; // Reduced to 200ms for tighter feel
+        this.knockbackDirection = direction;
         
         // Small vertical hop
         this.velocityY = -150;
