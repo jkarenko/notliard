@@ -7,6 +7,7 @@ import HUDScene from './HUDScene'; // Added HUDScene import
 import EntitySpawner from '../services/EntitySpawner';
 import Door from '../entities/Door';
 import Enemy from '../entities/Enemy';
+import Item from '../entities/Item';
 import Slime from '../entities/enemies/Slime';
 import CombatSystem from '../systems/CombatSystem';
 import GameState from '../data/GameState';
@@ -21,6 +22,7 @@ export default class CavernScene extends Phaser.Scene {
     private terrainLayer!: Phaser.Tilemaps.TilemapLayer;
     private doors: Door[] = [];
     private enemies: Enemy[] = [];
+    private items: Item[] = [];
 
     private accumulator: number = 0;
     private fixedTimeStep: number = 1000 / GAME_SPEED_HZ;
@@ -47,9 +49,10 @@ export default class CavernScene extends Phaser.Scene {
 
         // Spawn Entities
         const spawner = new EntitySpawner(this);
-        const { doors, enemies } = spawner.spawnFromMap(this.map);
+        const { doors, enemies, items } = spawner.spawnFromMap(this.map, 'cavern_test');
         this.doors = doors;
         this.enemies = enemies;
+        this.items = items;
 
         // Spawn player
         const startX = data.startX ?? 4 * GRID_SIZE;
@@ -160,6 +163,26 @@ export default class CavernScene extends Phaser.Scene {
 
         // Combat: Player-Enemy Collision
         this.combatSystem.checkPlayerEnemyCollision(this.player, this.enemies);
+
+        // Item Collection
+        this.items = this.items.filter(item => {
+            // Check for overlap (simple grid check or AABB)
+            // Using grid proximity for simplicity
+            if (Math.abs(item.gridX - pGridX) <= 1 && Math.abs(item.logicalY - this.player.logicalY) < GRID_SIZE) {
+                // If close enough, check precise AABB overlap via physics body?
+                // For now, grid proximity + small distance check is fine
+                // But let's use the body if possible.
+                // Since bodies are custom, let's stick to grid/distance
+                
+                // Refine check:
+                const dx = (item.gridX * GRID_SIZE) - (this.player.gridX * GRID_SIZE);
+                const dy = item.logicalY - this.player.logicalY;
+                if (dx * dx + dy * dy < (GRID_SIZE * GRID_SIZE)) {
+                     return !item.collect();
+                }
+            }
+            return true;
+        });
 
         // Update HUD (after any potential damage)
         const hudScene = this.scene.get('HUDScene') as HUDScene;

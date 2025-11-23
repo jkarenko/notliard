@@ -5,6 +5,7 @@ import { GRID_SIZE, GAME_SPEED_HZ } from '../config/Constants';
 import HUDScene, { HUD_HEIGHT } from './HUDScene';
 import EntitySpawner from '../services/EntitySpawner';
 import Door from '../entities/Door';
+import Item from '../entities/Item';
 import GameState from '../data/GameState';
 
 export default class TownScene extends Phaser.Scene {
@@ -14,6 +15,7 @@ export default class TownScene extends Phaser.Scene {
     private map!: Phaser.Tilemaps.Tilemap;
     private terrainLayer!: Phaser.Tilemaps.TilemapLayer;
     private doors: Door[] = [];
+    private items: Item[] = [];
 
     private accumulator: number = 0;
     private fixedTimeStep: number = 1000 / GAME_SPEED_HZ;
@@ -39,8 +41,9 @@ export default class TownScene extends Phaser.Scene {
 
         // Spawn Entities
         const spawner = new EntitySpawner(this);
-        const { doors } = spawner.spawnFromMap(this.map);
+        const { doors, items } = spawner.spawnFromMap(this.map, 'town_test');
         this.doors = doors;
+        this.items = items || []; // Default to empty if spawner doesn't return items for town yet (safe guard)
 
         // Spawn player
         const startX = data.startX ?? 2 * GRID_SIZE;
@@ -137,6 +140,18 @@ export default class TownScene extends Phaser.Scene {
                 this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
             }
         }
+
+        // Item Collection
+        this.items = this.items.filter(item => {
+            if (Math.abs(item.gridX - pGridX) <= 1 && Math.abs(item.logicalY - this.player.logicalY) < GRID_SIZE) {
+                const dx = (item.gridX * GRID_SIZE) - (this.player.gridX * GRID_SIZE);
+                const dy = item.logicalY - this.player.logicalY;
+                if (dx * dx + dy * dy < (GRID_SIZE * GRID_SIZE)) {
+                     return !item.collect();
+                }
+            }
+            return true;
+        });
 
         // Update HUD
         const hudScene = this.scene.get('HUDScene') as HUDScene;

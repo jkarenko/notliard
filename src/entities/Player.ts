@@ -145,6 +145,15 @@ export default class Player extends Phaser.GameObjects.Sprite {
         }
     }
 
+    heal(amount: number) {
+        this.hp += amount;
+        if (this.hp > this.maxHp) this.hp = this.maxHp;
+        console.log(`Player healed ${amount}. HP: ${this.hp}`);
+        // Optional: Visual effect for healing (green tint?)
+        this.setTint(0x00ff00);
+        this.scene.time.delayedCall(200, () => this.clearTint());
+    }
+
     updateLogic(delta: number) {
         if (this.isAttacking) {
             this.attackTimer -= delta;

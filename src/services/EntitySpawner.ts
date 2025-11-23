@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import Door from '../entities/Door';
 import Enemy from '../entities/Enemy';
 import Slime from '../entities/enemies/Slime';
+import Item, { type ItemType } from '../entities/Item';
+import GameState from '../data/GameState';
 
 export default class EntitySpawner {
     private scene: Phaser.Scene;
@@ -10,14 +12,15 @@ export default class EntitySpawner {
         this.scene = scene;
     }
 
-    spawnFromMap(map: Phaser.Tilemaps.Tilemap): { doors: Door[], enemies: Enemy[] } {
+    spawnFromMap(map: Phaser.Tilemaps.Tilemap, mapKey: string = 'unknown_map'): { doors: Door[], enemies: Enemy[], items: Item[] } {
         const doors: Door[] = [];
         const enemies: Enemy[] = [];
+        const items: Item[] = [];
         
         const objectLayer = map.getObjectLayer('Entities');
         if (!objectLayer) {
             console.warn('EntitySpawner: No "Entities" layer found in map.');
-            return { doors, enemies };
+            return { doors, enemies, items };
         }
 
         objectLayer.objects.forEach(obj => {
@@ -41,8 +44,31 @@ export default class EntitySpawner {
                      enemies.push(slime);
                  }
              }
+             else if (obj.type === 'item') {
+                 if (obj.x !== undefined && obj.y !== undefined) {
+                     const itemType = obj.properties?.find((p: any) => p.name === 'itemType')?.value as ItemType;
+                     const value = obj.properties?.find((p: any) => p.name === 'value')?.value;
+                     const itemId = obj.properties?.find((p: any) => p.name === 'itemId')?.value;
+                     // Use object ID or name as persistent ID if provided, or generate one based on map + ID
+                     const persistentId = obj.name || `item_${mapKey}_${obj.id}`;
+
+                     // Check if already collected
+                     if (GameState.progression.chests.includes(persistentId) || 
+                         GameState.progression.walls.includes(persistentId)) {
+                         return; // Skip spawning
+                     }
+
+                     const item = new Item(this.scene, obj.x, obj.y, {
+                         type: itemType,
+                         value: value,
+                         itemId: itemId,
+                         persistentId: persistentId
+                     });
+                     items.push(item);
+                 }
+             }
         });
 
-        return { doors, enemies };
+        return { doors, enemies, items };
     }
 }
