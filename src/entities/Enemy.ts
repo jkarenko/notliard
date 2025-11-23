@@ -13,6 +13,7 @@ export default class Enemy extends Phaser.GameObjects.Sprite implements PhysicsE
     prevLogicalY: number;
 
     hp: number = 3;
+    damage: number = 5;
     almasReward: number = 10;
     protected baseTint: number = 0xffffff;
 

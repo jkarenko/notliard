@@ -111,14 +111,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         return type;
     }
 
-    takeDamage(amount: number) {
-        if (this.isInvulnerable) return;
-
-        this.hp -= amount;
-        if (this.hp < 0) this.hp = 0;
-
-        // Visual feedback
-        this.setTint(0xff0000); // Red flash for damage
+    triggerInvulnerability() {
         this.isInvulnerable = true;
         this.invulnerabilityTimer = this.INVULNERABILITY_DURATION;
 
@@ -137,6 +130,17 @@ export default class Player extends Phaser.GameObjects.Sprite {
                 }
             }
         });
+    }
+
+    takeDamage(amount: number) {
+        if (this.isInvulnerable) return;
+
+        this.hp -= amount;
+        if (this.hp < 0) this.hp = 0;
+
+        // Visual feedback
+        this.setTint(0xff0000); // Red flash for damage
+        this.triggerInvulnerability();
 
         console.log(`Player took ${amount} damage. HP: ${this.hp}`);
 

@@ -1,6 +1,8 @@
 import Player from '../entities/Player';
 import Enemy from '../entities/Enemy';
 import { GRID_SIZE } from '../config/Constants';
+import InventorySystem from './InventorySystem';
+import GameState from '../data/GameState';
 
 export default class CombatSystem {
     attack(player: Player, enemies: Enemy[], type: 'front' | 'down'): boolean {
@@ -18,19 +20,17 @@ export default class CombatSystem {
         }
 
         // 2. Check for enemies in that grid cell
-        // We check if enemy gridX matches targetGridX
-        // And if enemy gridY is close enough (same row)
-        
         const hitEnemies = enemies.filter(e => 
             e.active && 
-            Math.abs(e.gridX - targetGridX) < 1 && // Exact X match (using float tolerance if needed)
+            Math.abs(e.gridX - targetGridX) < 1 && // Exact X match
             Math.abs(Math.floor((e.logicalY + GRID_SIZE/2) / GRID_SIZE) - targetGridY) <= 0 // Same row
         );
 
         // 3. Apply Damage
+        const damage = InventorySystem.getDamage();
         hitEnemies.forEach(e => {
-            e.takeDamage(1);
-            console.log('Enemy hit!');
+            e.takeDamage(damage);
+            console.log(`Enemy hit for ${damage} damage!`);
         });
         
         return hitEnemies.length > 0;
@@ -62,9 +62,39 @@ export default class CombatSystem {
                 playerBottom > enemyTop
             ) {
                 // Collision detected
-                player.takeDamage(10); // Example: 10 damage
-                // Add knockback if desired (e.g., player.velocityY = -200; player.gridX += direction;)
+                this.applyDamageToPlayer(player, enemy.damage);
             }
         });
+    }
+
+    private applyDamageToPlayer(player: Player, amount: number) {
+        const shield = GameState.character.shield;
+
+        if (shield.equipped !== -1 && shield.current > 0) {
+            // Shield takes damage
+            shield.current -= amount;
+            console.log(`Shield absorbed ${amount} damage. Remaining: ${shield.current}`);
+            
+            // Visual feedback for shield hit?
+            // player.flashShield(); 
+
+            if (shield.current <= 0) {
+                shield.current = 0;
+                // Mark shield as broken in inventory?
+                // The SaveData tracks 'equipped' separately from ownership.
+                // We keep it equipped but it's now broken (0 HP).
+                // Or we unequip it?
+                // GameState.character.equipment.shield = -1; 
+                // shield.equipped = -1;
+                console.log("Shield BROKEN!");
+            }
+            
+            // Player still gets invulnerability frames even on shield hit to prevent instant shredding
+            player.triggerInvulnerability();
+
+        } else {
+            // Player takes damage
+            player.takeDamage(amount);
+        }
     }
 }
