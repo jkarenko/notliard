@@ -2,8 +2,8 @@ import Phaser from 'phaser';
 
 const GameConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    width: 320,
-    height: 240,
+    width: 640, 
+    height: 480,
     parent: 'game-container',
     backgroundColor: '#333333',
     physics: {
@@ -14,7 +14,8 @@ const GameConfig: Phaser.Types.Core.GameConfig = {
         }
     },
     render: {
-        pixelArt: true // Ensures crisp pixel art scaling
+        pixelArt: true, // Ensures crisp pixel art scaling
+        roundPixels: true
     },
     scale: {
         mode: Phaser.Scale.FIT,

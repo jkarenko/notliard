@@ -64,7 +64,10 @@ export default class CavernScene extends Phaser.Scene {
         
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-        this.cameras.main.setZoom(2);
+        
+        // Calculate Zoom to show ~26 tiles horizontally (208 logical pixels)
+        const zoom = this.scale.width / (26 * GRID_SIZE);
+        this.cameras.main.setZoom(zoom);
 
         this.add.text(10, 10, 'Cavern Scene', {
             fontSize: '8px',
