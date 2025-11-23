@@ -70,6 +70,86 @@
                  "width":8,
                  "x":296,
                  "y":104
+                },
+                {
+                 "height":8,
+                 "id":2,
+                 "name":"Sage",
+                 "properties":[
+                        { "name":"destination", "type":"string", "value":"ShopScene" },
+                        { "name":"shopType", "type":"string", "value":"sage" },
+                        { "name":"triggerType", "type":"string", "value":"press_up" }
+                 ],
+                 "rotation":0,
+                 "type":"door",
+                 "visible":true,
+                 "width":8,
+                 "x":40,
+                 "y":104
+                },
+                {
+                 "height":8,
+                 "id":3,
+                 "name":"Weapon",
+                 "properties":[
+                        { "name":"destination", "type":"string", "value":"ShopScene" },
+                        { "name":"shopType", "type":"string", "value":"weapon" },
+                        { "name":"triggerType", "type":"string", "value":"press_up" }
+                 ],
+                 "rotation":0,
+                 "type":"door",
+                 "visible":true,
+                 "width":8,
+                 "x":80,
+                 "y":104
+                },
+                {
+                 "height":8,
+                 "id":4,
+                 "name":"Magic",
+                 "properties":[
+                        { "name":"destination", "type":"string", "value":"ShopScene" },
+                        { "name":"shopType", "type":"string", "value":"magic" },
+                        { "name":"triggerType", "type":"string", "value":"press_up" }
+                 ],
+                 "rotation":0,
+                 "type":"door",
+                 "visible":true,
+                 "width":8,
+                 "x":120,
+                 "y":104
+                },
+                {
+                 "height":8,
+                 "id":5,
+                 "name":"Inn",
+                 "properties":[
+                        { "name":"destination", "type":"string", "value":"ShopScene" },
+                        { "name":"shopType", "type":"string", "value":"inn" },
+                        { "name":"triggerType", "type":"string", "value":"press_up" }
+                 ],
+                 "rotation":0,
+                 "type":"door",
+                 "visible":true,
+                 "width":8,
+                 "x":160,
+                 "y":104
+                },
+                {
+                 "height":8,
+                 "id":6,
+                 "name":"Bank",
+                 "properties":[
+                        { "name":"destination", "type":"string", "value":"ShopScene" },
+                        { "name":"shopType", "type":"string", "value":"bank" },
+                        { "name":"triggerType", "type":"string", "value":"press_up" }
+                 ],
+                 "rotation":0,
+                 "type":"door",
+                 "visible":true,
+                 "width":8,
+                 "x":200,
+                 "y":104
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -78,7 +158,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":2,
+ "nextobjectid":7,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",
