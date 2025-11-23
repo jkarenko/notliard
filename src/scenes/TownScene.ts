@@ -6,7 +6,6 @@ import HUDScene, { HUD_HEIGHT } from './HUDScene';
 import EntitySpawner from '../services/EntitySpawner';
 import Door from '../entities/Door';
 import Item from '../entities/Item';
-import GameState from '../data/GameState';
 
 export default class TownScene extends Phaser.Scene {
     private player!: Player;
@@ -156,13 +155,7 @@ export default class TownScene extends Phaser.Scene {
         // Update HUD
         const hudScene = this.scene.get('HUDScene') as HUDScene;
         if (hudScene) {
-            hudScene.updateStats(
-                this.player.hp,
-                this.player.maxHp,
-                GameState.gold,
-                GameState.almas,
-                GameState.currentTownName
-            );
+            hudScene.refresh();
         }
     }
 }
