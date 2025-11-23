@@ -130,17 +130,26 @@ export default class TownScene extends Phaser.Scene {
         );
 
         if (door) {
-            this.scene.stop('HUDScene');
-            
-            if (door.destination === 'TransitionScene' && door.nextScene) {
-                this.scene.start('TransitionScene', {
-                    nextScene: door.nextScene,
-                    startX: door.targetX,
-                    startY: door.targetY,
-                    direction: 'right' // Exiting town usually to the right
+            if (door.destination === 'ShopScene') {
+                // Pause TownScene and launch ShopScene as overlay
+                this.scene.pause();
+                this.scene.launch('ShopScene', {
+                    shopType: door.shopType,
+                    townId: 'muralla' // TODO: Get from scene data
                 });
             } else {
-                this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
+                this.scene.stop('HUDScene');
+
+                if (door.destination === 'TransitionScene' && door.nextScene) {
+                    this.scene.start('TransitionScene', {
+                        nextScene: door.nextScene,
+                        startX: door.targetX,
+                        startY: door.targetY,
+                        direction: 'right' // Exiting town usually to the right
+                    });
+                } else {
+                    this.scene.start(door.destination, { startX: door.targetX, startY: door.targetY });
+                }
             }
         }
 

@@ -31,9 +31,10 @@ export default class EntitySpawner {
                  const targetY = obj.properties?.find((p: any) => p.name === 'targetY')?.value;
                  const triggerType = obj.properties?.find((p: any) => p.name === 'triggerType')?.value || 'press_up';
                  const nextScene = obj.properties?.find((p: any) => p.name === 'nextScene')?.value;
-                 
+                 const shopType = obj.properties?.find((p: any) => p.name === 'shopType')?.value;
+
                  if (dest && obj.x !== undefined && obj.y !== undefined) {
-                     const door = new Door(this.scene, obj.x, obj.y, dest, targetX, targetY, triggerType, nextScene);
+                     const door = new Door(this.scene, obj.x, obj.y, dest, targetX, targetY, triggerType, nextScene, shopType);
                      doors.push(door);
                  }
              }
