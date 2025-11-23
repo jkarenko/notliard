@@ -1,9 +1,20 @@
-import Player from '../entities/Player';
-import Enemy from '../entities/Enemy';
 import { GRID_SIZE } from '../config/Constants';
 
+// Interfaces for testability - entities can implement these
+export interface CombatEntity {
+    gridX: number;
+    logicalY: number;
+    active: boolean;
+    takeDamage(amount: number): void;
+}
+
+export interface CombatPlayer extends CombatEntity {
+    flipX: boolean;
+    isInvulnerable: boolean;
+}
+
 export default class CombatSystem {
-    attack(player: Player, enemies: Enemy[], type: 'front' | 'down'): boolean {
+    attack(player: CombatPlayer, enemies: CombatEntity[], type: 'front' | 'down'): boolean {
         // 1. Determine Hitbox
         let targetGridX = player.gridX;
         // Player center Y row
@@ -36,7 +47,7 @@ export default class CombatSystem {
         return hitEnemies.length > 0;
     }
 
-    checkPlayerEnemyCollision(player: Player, enemies: Enemy[]) {
+    checkPlayerEnemyCollision(player: CombatPlayer, enemies: CombatEntity[]) {
         if (player.isInvulnerable) return; // Player is protected
 
         // Player bounding box (using logical position, 8x8 size)

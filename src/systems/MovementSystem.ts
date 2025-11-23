@@ -1,13 +1,21 @@
-import Phaser from 'phaser';
 import { GRID_SIZE, GRAVITY, JUMP_HEIGHT } from '../config/Constants';
 import type { PhysicsEntity } from '../types/Entities';
+
+// Interface for testability - tilemap layers can implement this
+export interface Tile {
+    collides: boolean;
+}
+
+export interface TilemapLayer {
+    getTileAt(x: number, y: number): Tile | null;
+}
 
 export default class MovementSystem {
     constructor() {
     }
 
     // Called every fixed update tick
-    update(entity: PhysicsEntity, deltaMs: number, layer: Phaser.Tilemaps.TilemapLayer) {
+    update(entity: PhysicsEntity, deltaMs: number, layer: TilemapLayer) {
         const dt = deltaMs / 1000; // Convert to seconds
 
         // Apply Gravity
@@ -95,7 +103,7 @@ export default class MovementSystem {
     }
 
     // Moves horizontally by 1 grid unit
-    moveHorizontal(entity: PhysicsEntity, direction: number, layer: Phaser.Tilemaps.TilemapLayer): boolean {
+    moveHorizontal(entity: PhysicsEntity, direction: number, layer: TilemapLayer): boolean {
         const nextGridX = entity.gridX + direction;
         
         // Horizontal Collision Check
