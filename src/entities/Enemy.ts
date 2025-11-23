@@ -58,8 +58,8 @@ export default class Enemy extends Phaser.GameObjects.Sprite implements PhysicsE
         this.destroy();
         
         // Award Almas
-        GameState.character.almas += this.almasReward;
-        console.log(`Enemy defeated! Almas: ${GameState.character.almas}`);
+        GameState.almas += this.almasReward;
+        console.log(`Enemy defeated! Almas: ${GameState.almas}`);
     }
 
     updateVisuals(alpha: number) {

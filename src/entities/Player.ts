@@ -19,10 +19,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
     private readonly ATTACK_DURATION: number = 200; // ms
 
     // Player Stats (Proxy to GameState)
-    get hp(): number { return GameState.character.hp; }
-    set hp(value: number) { GameState.character.hp = value; }
+    get hp(): number { return GameState.hp; }
+    set hp(value: number) { GameState.hp = value; }
     
-    get maxHp(): number { return GameState.character.maxHp; }
+    get maxHp(): number { return GameState.maxHp; }
 
     isInvulnerable: boolean = false;
     private invulnerabilityTimer: number = 0;

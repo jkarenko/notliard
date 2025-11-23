@@ -144,9 +144,9 @@ export default class TownScene extends Phaser.Scene {
             hudScene.updateStats(
                 this.player.hp,
                 this.player.maxHp,
-                GameState.character.gold,
-                GameState.character.almas,
-                GameState.character.currentTown
+                GameState.gold,
+                GameState.almas,
+                GameState.currentTownName
             );
         }
     }
