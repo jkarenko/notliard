@@ -18,6 +18,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
     private attackTimer: number = 0;
     private readonly ATTACK_DURATION: number = 200; // ms
 
+    isKnockedBack: boolean = false;
+    knockbackTimer: number = 0;
+    knockbackDirection: number = 0;
+
     // Player Stats (Proxy to GameState)
     get hp(): number { return GameState.hp; }
     set hp(value: number) { GameState.hp = value; }
@@ -158,7 +162,40 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.scene.time.delayedCall(200, () => this.clearTint());
     }
 
+    applyKnockback(sourceX: number) {
+        if (this.isInvulnerable) return; // Should already be checked, but safety first
+        
+        this.isKnockedBack = true;
+        this.knockbackTimer = 400; // 400ms stun/knockback
+        
+        // Direction: away from source (enemy)
+        const playerCenterX = (this.gridX * GRID_SIZE) + (GRID_SIZE / 2);
+        
+        // If overlap or too close, default to opposite of facing direction
+        // If facing right (flipX=false), knock left (-1).
+        // If facing left (flipX=true), knock right (1).
+        if (Math.abs(playerCenterX - sourceX) < 1) {
+            this.knockbackDirection = this.flipX ? 1 : -1;
+        } else {
+            this.knockbackDirection = playerCenterX < sourceX ? -1 : 1;
+        }
+        
+        // Small vertical hop
+        this.velocityY = -150;
+        this.isGrounded = false;
+        
+        console.log(`Knockback applied. Dir: ${this.knockbackDirection}, Timer: ${this.knockbackTimer}`);
+    }
+
     updateLogic(delta: number) {
+        if (this.isKnockedBack) {
+            this.knockbackTimer -= delta;
+            if (this.knockbackTimer <= 0) {
+                this.isKnockedBack = false;
+                console.log('Knockback ended');
+            }
+        }
+
         if (this.isAttacking) {
             this.attackTimer -= delta;
             if (this.attackTimer <= 0) {
@@ -187,6 +224,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.clearTint();
         this.alpha = 1;
         this.isInvulnerable = false;
+        this.isKnockedBack = false;
     }
 
     // Capture current state as previous for interpolation

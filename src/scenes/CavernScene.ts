@@ -109,46 +109,56 @@ export default class CavernScene extends Phaser.Scene {
 
         let moved = false;
         
-        if (this.cursors.left!.isDown) {
-            if (this.movementSystem.moveHorizontal(this.player, -1, this.terrainLayer)) {
-                this.player.setFlipX(true);
-                moved = true;
+        // Handle Knockback or Input
+        if (this.player.isKnockedBack) {
+            // Force movement in knockback direction
+            this.movementSystem.moveHorizontal(this.player, this.player.knockbackDirection, this.terrainLayer);
+            // No animation change here? Maybe set to "hurt" frame if available
+            // For now, keep current frame or idle
+        } else {
+            // Normal Input Processing
+            if (this.cursors.left!.isDown) {
+                if (this.movementSystem.moveHorizontal(this.player, -1, this.terrainLayer)) {
+                    this.player.setFlipX(true);
+                    moved = true;
+                }
+            } else if (this.cursors.right!.isDown) {
+                if (this.movementSystem.moveHorizontal(this.player, 1, this.terrainLayer)) {
+                    this.player.setFlipX(false);
+                    moved = true;
+                }
             }
-        } else if (this.cursors.right!.isDown) {
-            if (this.movementSystem.moveHorizontal(this.player, 1, this.terrainLayer)) {
-                this.player.setFlipX(false);
-                moved = true;
+
+            // Check Door Interaction (UP Key) vs Jump
+            const pGridX = this.player.gridX;
+            const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE);
+            
+            // Find door at player location
+            const door = this.doors.find(d => d.gridX === pGridX && d.gridY === pGridY);
+
+            if (this.cursors.up!.isDown) {
+                if (door && door.triggerType === 'press_up') {
+                    // Enter door
+                    this.handleDoorTransition(door, 'left'); // Assuming Cavern->Town is left
+                    return; // Skip physics/jump
+                } else {
+                    // Jump
+                    this.movementSystem.jump(this.player);
+                }
+            }
+
+            if (this.keys.space.isDown) {
+                const attackType = this.player.startAttack(this.cursors);
+                if (attackType) {
+                    this.combatSystem.attack(this.player, this.enemies, attackType);
+                }
             }
         }
 
-        // Check Door Interaction (UP Key) vs Jump
-        const pGridX = this.player.gridX;
-        const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE);
-        
-        // Find door at player location
-        const door = this.doors.find(d => d.gridX === pGridX && d.gridY === pGridY);
-
-        if (this.cursors.up!.isDown) {
-            if (door && door.triggerType === 'press_up') {
-                // Enter door
-                this.handleDoorTransition(door, 'left'); // Assuming Cavern->Town is left
-                return; // Skip physics/jump
-            } else {
-                // Jump
-                this.movementSystem.jump(this.player);
-            }
-        }
-
-        if (this.keys.space.isDown) {
-            const attackType = this.player.startAttack(this.cursors);
-            if (attackType) {
-                this.combatSystem.attack(this.player, this.enemies, attackType);
-            }
-        }
-
+        // Apply Physics (Gravity) - Happens regardless of state
         this.movementSystem.update(this.player, delta, this.terrainLayer);
 
-        if (moved) {
+        if (moved && !this.player.isKnockedBack) {
             this.player.playWalkAnimation();
         } else {
              if (this.player.isGrounded) {
@@ -157,6 +167,10 @@ export default class CavernScene extends Phaser.Scene {
         }
 
         // Check Touch Transitions (e.g. Exit to Town)
+        const pGridX = this.player.gridX;
+        const pGridY = Math.floor((this.player.logicalY + 4) / GRID_SIZE);
+        const door = this.doors.find(d => d.gridX === pGridX && d.gridY === pGridY);
+        
         if (door && door.triggerType === 'touch') {
             this.handleDoorTransition(door, 'left');
         }

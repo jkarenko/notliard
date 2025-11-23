@@ -62,13 +62,20 @@ export default class CombatSystem {
                 playerBottom > enemyTop
             ) {
                 // Collision detected
-                this.applyDamageToPlayer(player, enemy.damage);
+                const enemyCenterX = (enemy.gridX * GRID_SIZE) + (GRID_SIZE / 2);
+                this.applyDamageToPlayer(player, enemy.damage, enemyCenterX);
             }
         });
     }
 
-    private applyDamageToPlayer(player: Player, amount: number) {
+    private applyDamageToPlayer(player: Player, amount: number, sourceX: number) {
         const shield = GameState.character.shield;
+
+        // Apply knockback regardless of shield hit (usually)
+        // Check if player is already invulnerable to avoid spamming knockback
+        if (!player.isInvulnerable) {
+             player.applyKnockback(sourceX);
+        }
 
         if (shield.equipped !== -1 && shield.current > 0) {
             // Shield takes damage
